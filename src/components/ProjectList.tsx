@@ -12,99 +12,86 @@ type Project = {
   totalTasks: number;
 };
 
-const initialProjects: Project[] = [
-  {
-    id: 1,
-    name: "Sitio corporativo",
-    description: "Rediseño y desarrollo del sitio principal de la empresa.",
-    progress: 75,
-    tasksCompleted: 15,
-    totalTasks: 20,
-  },
-  {
-    id: 2,
-    name: "Panel de clientes",
-    description: "Dashboard para consultar usuarios, actividad y métricas.",
-    progress: 45,
-    tasksCompleted: 9,
-    totalTasks: 20,
-  },
-  {
-    id: 3,
-    name: "API de inventario",
-    description:
-      "Servicio para administrar productos, existencias y movimientos.",
-    progress: 60,
-    tasksCompleted: 12,
-    totalTasks: 20,
-  },
-  {
-    id: 4,
-    name: "Aplicación móvil",
-    description:
-      "Primera versión de la aplicación para seguimiento de pedidos.",
-    progress: 30,
-    tasksCompleted: 6,
-    totalTasks: 20,
-  },
-  {
-    id: 5,
-    name: "Portal interno",
-    description:
-      "Herramienta para consultar documentación y procesos internos.",
-    progress: 90,
-    tasksCompleted: 18,
-    totalTasks: 20,
-  },
-  {
-    id: 6,
-    name: "Sistema de reportes",
-    description:
-      "Módulo para visualizar métricas y generar reportes mensuales.",
-    progress: 20,
-    tasksCompleted: 4,
-    totalTasks: 20,
-  },
-];
+type ProjectListProps = {
+  initialProjects: Project[];
+};
 
-export default function ProjectList() {
+export default function ProjectList({
+  initialProjects,
+}: ProjectListProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
 
     if (!trimmedName || !trimmedDescription) {
+      setError("Completa el nombre y la descripción.");
       return;
     }
 
-    const newProject: Project = {
-      id: Date.now(),
-      name: trimmedName,
-      description: trimmedDescription,
-      progress: 0,
-      tasksCompleted: 0,
-      totalTasks: 0,
-    };
+    setIsSubmitting(true);
+    setError("");
 
-    setProjects((currentProjects) => [
-      ...currentProjects,
-      newProject,
-    ]);
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          description: trimmedDescription,
+        }),
+      });
 
-    setName("");
-    setDescription("");
-    setIsFormOpen(false);
+      if (!response.ok) {
+        throw new Error("No se pudo crear el proyecto.");
+      }
+
+      const createdProject = await response.json();
+
+      const newProject: Project = {
+        id: createdProject.id,
+        name: createdProject.name,
+        description: createdProject.description,
+        progress: 0,
+        tasksCompleted: 0,
+        totalTasks: 0,
+      };
+
+      setProjects((currentProjects) => [
+        ...currentProjects,
+        newProject,
+      ]);
+
+      setName("");
+      setDescription("");
+      setIsFormOpen(false);
+    } catch {
+      setError(
+        "Ocurrió un problema al guardar el proyecto.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleCancel() {
     setName("");
     setDescription("");
+    setError("");
     setIsFormOpen(false);
   }
 
@@ -158,9 +145,12 @@ export default function ProjectList() {
                 id="project-name"
                 type="text"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
                 placeholder="Ej. Portal de proveedores"
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500"
+                disabled={isSubmitting}
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500 disabled:opacity-60"
               />
             </div>
 
@@ -175,45 +165,70 @@ export default function ProjectList() {
               <textarea
                 id="project-description"
                 value={description}
-                onChange={(event) => setDescription(event.target.value)}
+                onChange={(event) =>
+                  setDescription(event.target.value)
+                }
                 placeholder="Describe brevemente el objetivo del proyecto."
                 rows={4}
-                className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500"
+                disabled={isSubmitting}
+                className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500 disabled:opacity-60"
               />
             </div>
+
+            {error && (
+              <p className="text-sm text-rose-300">
+                {error}
+              </p>
+            )}
 
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                disabled={isSubmitting}
+                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-60"
               >
                 Cancelar
               </button>
 
               <button
                 type="submit"
-                className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
+                disabled={isSubmitting}
+                className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Crear proyecto
+                {isSubmitting
+                  ? "Guardando..."
+                  : "Crear proyecto"}
               </button>
             </div>
           </form>
         </section>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            name={project.name}
-            description={project.description}
-            progress={project.progress}
-            tasksCompleted={project.tasksCompleted}
-            totalTasks={project.totalTasks}
-          />
-        ))}
-      </div>
+      {projects.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              name={project.name}
+              description={project.description}
+              progress={project.progress}
+              tasksCompleted={project.tasksCompleted}
+              totalTasks={project.totalTasks}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-slate-800 p-10 text-center">
+          <h3 className="font-medium text-white">
+            No hay proyectos todavía
+          </h3>
+
+          <p className="mt-2 text-sm text-slate-500">
+            Crea tu primer proyecto para comenzar a organizar el trabajo.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

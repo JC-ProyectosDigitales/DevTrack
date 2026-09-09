@@ -3,8 +3,48 @@ import ProjectCard from "@/components/ProjectCard";
 import Sidebar from "@/components/Sidebar";
 import StatCard from "@/components/StatCard";
 import TaskItem from "@/components/TaskItem";
+import { db } from "@/prisma/db";
 
-export default function Home() {
+export default async function Home() {
+  const projects = await db.orm.public.Project.all();
+  const tasks = await db.orm.public.Task.include("project").all();
+
+  const completedTasks = tasks.filter(
+    (task) => task.status === "Completada",
+  ).length;
+
+  const pendingTasks = tasks.filter(
+    (task) =>
+      task.status === "Pendiente" ||
+      task.status === "En progreso",
+  ).length;
+
+  const now = new Date();
+
+  const overdueTasks = tasks.filter((task) => {
+    if (task.status === "Completada") {
+      return false;
+    }
+
+    return new Date(task.dueDate) < now;
+  }).length;
+
+  const recentProjects = [...projects]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 4);
+
+  const recentTasks = [...tasks]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 4);
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
@@ -17,25 +57,25 @@ export default function Home() {
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 title="Proyectos activos"
-                value={4}
-                description="Proyectos actualmente en desarrollo"
+                value={projects.length}
+                description="Proyectos registrados"
               />
 
               <StatCard
                 title="Tareas pendientes"
-                value={12}
+                value={pendingTasks}
                 description="Tareas que requieren atención"
               />
 
               <StatCard
                 title="Tareas completadas"
-                value={28}
+                value={completedTasks}
                 description="Tareas finalizadas"
               />
 
               <StatCard
                 title="Tareas vencidas"
-                value={3}
+                value={overdueTasks}
                 description="Tareas fuera de la fecha límite"
               />
             </div>
@@ -51,39 +91,46 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-2">
-                <ProjectCard
-                  name="Sitio corporativo"
-                  description="Rediseño y desarrollo del sitio principal de la empresa."
-                  progress={75}
-                  tasksCompleted={15}
-                  totalTasks={20}
-                />
+              {recentProjects.length > 0 ? (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {recentProjects.map((project) => {
+                    const projectTasks = tasks.filter(
+                      (task) => task.projectId === project.id,
+                    );
 
-                <ProjectCard
-                  name="Panel de clientes"
-                  description="Dashboard para consultar usuarios, actividad y métricas."
-                  progress={45}
-                  tasksCompleted={9}
-                  totalTasks={20}
-                />
+                    const completedProjectTasks =
+                      projectTasks.filter(
+                        (task) => task.status === "Completada",
+                      ).length;
 
-                <ProjectCard
-                  name="API de inventario"
-                  description="Servicio para administrar productos, existencias y movimientos."
-                  progress={60}
-                  tasksCompleted={12}
-                  totalTasks={20}
-                />
+                    const totalTasks = projectTasks.length;
 
-                <ProjectCard
-                  name="Aplicación móvil"
-                  description="Primera versión de la aplicación para seguimiento de pedidos."
-                  progress={30}
-                  tasksCompleted={6}
-                  totalTasks={20}
-                />
-              </div>
+                    const progress =
+                      totalTasks > 0
+                        ? Math.round(
+                            (completedProjectTasks / totalTasks) * 100,
+                          )
+                        : 0;
+
+                    return (
+                      <ProjectCard
+                        key={project.id}
+                        name={project.name}
+                        description={project.description}
+                        progress={progress}
+                        tasksCompleted={completedProjectTasks}
+                        totalTasks={totalTasks}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center">
+                  <p className="text-sm text-slate-500">
+                    Todavía no hay proyectos registrados.
+                  </p>
+                </div>
+              )}
             </section>
 
             <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
@@ -98,37 +145,38 @@ export default function Home() {
               </div>
 
               <div className="mt-4">
-                <TaskItem
-                  title="Diseñar página de inicio"
-                  project="Sitio corporativo"
-                  status="En progreso"
-                  priority="Alta"
-                  dueDate="10 Sep 2026"
-                />
-
-                <TaskItem
-                  title="Crear tabla de usuarios"
-                  project="Panel de clientes"
-                  status="Pendiente"
-                  priority="Media"
-                  dueDate="12 Sep 2026"
-                />
-
-                <TaskItem
-                  title="Documentar endpoints"
-                  project="API de inventario"
-                  status="Pendiente"
-                  priority="Baja"
-                  dueDate="14 Sep 2026"
-                />
-
-                <TaskItem
-                  title="Configurar navegación principal"
-                  project="Aplicación móvil"
-                  status="Completada"
-                  priority="Alta"
-                  dueDate="8 Sep 2026"
-                />
+                {recentTasks.length > 0 ? (
+                  recentTasks.map((task) => (
+                    <TaskItem
+                      key={task.id}
+                      title={task.title}
+                      project={task.project.name}
+                      status={
+                        task.status as
+                          | "Pendiente"
+                          | "En progreso"
+                          | "Completada"
+                      }
+                      priority={
+                        task.priority as
+                          | "Alta"
+                          | "Media"
+                          | "Baja"
+                      }
+                      dueDate={new Date(
+                        task.dueDate,
+                      ).toLocaleDateString("es-MX", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    />
+                  ))
+                ) : (
+                  <p className="py-8 text-center text-sm text-slate-500">
+                    Todavía no hay tareas registradas.
+                  </p>
+                )}
               </div>
             </section>
           </div>

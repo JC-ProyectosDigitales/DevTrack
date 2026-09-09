@@ -1,0 +1,24 @@
+// use prisma-next
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  tasks       Task[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  status      String
+  priority    String
+  dueDate     TimestamptzString
+
+  projectId   Int
+  project     Project @relation(fields: [projectId], references: [id])
+
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}

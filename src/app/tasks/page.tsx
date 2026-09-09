@@ -1,8 +1,36 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import TaskList from "@/components/TaskList";
+import { db } from "@/prisma/db";
 
-export default function TasksPage() {
+export default async function TasksPage() {
+  const databaseTasks =
+    await db.orm.public.Task.include("project").all();
+
+  const databaseProjects =
+    await db.orm.public.Project.all();
+
+  const tasks = databaseTasks.map((task) => ({
+    id: task.id,
+    title: task.title,
+    project: task.project.name,
+    projectId: task.projectId,
+    status: task.status as
+      | "Pendiente"
+      | "En progreso"
+      | "Completada",
+    priority: task.priority as
+      | "Alta"
+      | "Media"
+      | "Baja",
+    dueDate: task.dueDate,
+  }));
+
+  const projects = databaseProjects.map((project) => ({
+    id: project.id,
+    name: project.name,
+  }));
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
@@ -15,7 +43,10 @@ export default function TasksPage() {
           />
 
           <div className="space-y-6 p-8">
-            <TaskList />
+            <TaskList
+              initialTasks={tasks}
+              projects={projects}
+            />
           </div>
         </section>
       </div>
