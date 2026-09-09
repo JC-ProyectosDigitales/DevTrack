@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import StatCard from "@/components/StatCard";
 
 export default function Home() {
   return (
@@ -11,12 +12,31 @@ export default function Home() {
           <Header />
 
           <div className="p-8">
-            <h3 className="text-lg font-semibold">Bienvenido a DevTrack</h3>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                title="Proyectos activos"
+                value={4}
+                description="Proyectos actualmente en desarrollo"
+              />
 
-            <p className="mt-2 max-w-2xl text-slate-400">
-              Aquí podrás consultar el progreso de tus proyectos, revisar tareas
-              pendientes y mantener organizado tu trabajo.
-            </p>
+              <StatCard
+                title="Tareas pendientes"
+                value={12}
+                description="Tareas que requieren atención"
+              />
+
+              <StatCard
+                title="Tareas completadas"
+                value={28}
+                description="Tareas finalizadas"
+              />
+
+              <StatCard
+                title="Tareas vencidas"
+                value={3}
+                description="Tareas fuera de la fecha límite"
+              />
+            </div>
           </div>
         </section>
       </div>
