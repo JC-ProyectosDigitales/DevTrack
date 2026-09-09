@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import ProjectCard from "@/components/ProjectCard";
 import Sidebar from "@/components/Sidebar";
 import StatCard from "@/components/StatCard";
+import TaskItem from "@/components/TaskItem";
 
 export default function Home() {
   return (
@@ -81,6 +82,52 @@ export default function Home() {
                   progress={30}
                   tasksCompleted={6}
                   totalTasks={20}
+                />
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+              <div className="mb-2">
+                <h2 className="text-xl font-semibold text-white">
+                  Tareas recientes
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  Actividades que requieren seguimiento.
+                </p>
+              </div>
+
+              <div className="mt-4">
+                <TaskItem
+                  title="Diseñar página de inicio"
+                  project="Sitio corporativo"
+                  status="En progreso"
+                  priority="Alta"
+                  dueDate="10 Sep 2026"
+                />
+
+                <TaskItem
+                  title="Crear tabla de usuarios"
+                  project="Panel de clientes"
+                  status="Pendiente"
+                  priority="Media"
+                  dueDate="12 Sep 2026"
+                />
+
+                <TaskItem
+                  title="Documentar endpoints"
+                  project="API de inventario"
+                  status="Pendiente"
+                  priority="Baja"
+                  dueDate="14 Sep 2026"
+                />
+
+                <TaskItem
+                  title="Configurar navegación principal"
+                  project="Aplicación móvil"
+                  status="Completada"
+                  priority="Alta"
+                  dueDate="8 Sep 2026"
                 />
               </div>
             </section>
