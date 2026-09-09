@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 type ProjectCardProps = {
+  id?: number;
   name: string;
   description: string;
   progress: number;
@@ -9,6 +12,7 @@ type ProjectCardProps = {
 };
 
 export default function ProjectCard({
+  id,
   name,
   description,
   progress,
@@ -21,9 +25,18 @@ export default function ProjectCard({
     <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">
-            {name}
-          </h3>
+          {id ? (
+            <Link
+              href={`/projects/${id}`}
+              className="text-lg font-semibold text-white hover:text-slate-300"
+            >
+              {name}
+            </Link>
+          ) : (
+            <h3 className="text-lg font-semibold text-white">
+              {name}
+            </h3>
+          )}
 
           <p className="mt-1 text-sm leading-6 text-slate-400">
             {description}

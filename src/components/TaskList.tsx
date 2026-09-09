@@ -31,11 +31,13 @@ type Project = {
 type TaskListProps = {
   initialTasks: Task[];
   projects: Project[];
+  initialProjectId?: number | null;
 };
 
 export default function TaskList({
   initialTasks,
   projects,
+  initialProjectId = null,
 }: TaskListProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
@@ -43,11 +45,17 @@ export default function TaskList({
   const [status, setStatus] = useState("all");
   const [priority, setPriority] = useState("all");
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(
+    initialProjectId !== null,
+    );
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
 
   const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState("");
+  const [projectId, setProjectId] = useState(
+    initialProjectId !== null
+      ? String(initialProjectId)
+      : "",
+  );
   const [newStatus, setNewStatus] =
     useState<TaskStatus>("Pendiente");
   const [newPriority, setNewPriority] =

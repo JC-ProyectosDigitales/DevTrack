@@ -120,14 +120,11 @@ export default async function Home() {
                     return (
                       <ProjectCard
                         key={project.id}
+                        id={project.id}
                         name={project.name}
-                        description={
-                          project.description
-                        }
+                        description={project.description}
                         progress={progress}
-                        tasksCompleted={
-                          completedProjectTasks
-                        }
+                        tasksCompleted={completedProjectTasks}
                         totalTasks={totalTasks}
                       />
                     );

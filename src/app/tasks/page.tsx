@@ -3,7 +3,17 @@ import Sidebar from "@/components/Sidebar";
 import TaskList from "@/components/TaskList";
 import { db } from "@/prisma/db";
 
-export default async function TasksPage() {
+type TasksPageProps = {
+  searchParams: Promise<{
+    projectId?: string;
+  }>;
+};
+
+export default async function TasksPage({
+  searchParams,
+}: TasksPageProps) {
+  const { projectId } = await searchParams;
+
   const databaseTasks =
     await db.orm.public.Task.all();
 
@@ -42,6 +52,12 @@ export default async function TasksPage() {
     };
   });
 
+  const initialProjectId =
+    projectId &&
+    Number.isInteger(Number(projectId))
+      ? Number(projectId)
+      : null;
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
@@ -57,6 +73,9 @@ export default async function TasksPage() {
             <TaskList
               initialTasks={tasks}
               projects={projects}
+              initialProjectId={
+                initialProjectId
+              }
             />
           </div>
         </section>
