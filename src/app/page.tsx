@@ -1,19 +1,24 @@
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-6xl items-center px-6">
-        <div>
-          <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-slate-400">
-            Project Management
-          </p>
+    <main className="min-h-screen bg-slate-950 text-slate-100">
+      <div className="flex min-h-screen">
+        <Sidebar />
 
-          <h1 className="text-5xl font-bold tracking-tight">DevTrack</h1>
+        <section className="flex-1">
+          <Header />
 
-          <p className="mt-4 max-w-xl text-lg leading-8 text-slate-300">
-            Organiza proyectos, administra tareas y da seguimiento al progreso
-            de tu equipo desde un solo lugar.
-          </p>
-        </div>
+          <div className="p-8">
+            <h3 className="text-lg font-semibold">Bienvenido a DevTrack</h3>
+
+            <p className="mt-2 max-w-2xl text-slate-400">
+              Aquí podrás consultar el progreso de tus proyectos, revisar tareas
+              pendientes y mantener organizado tu trabajo.
+            </p>
+          </div>
+        </section>
       </div>
     </main>
   );
