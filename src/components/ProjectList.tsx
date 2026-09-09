@@ -292,6 +292,7 @@ export default function ProjectList({
           {projects.map((project) => (
             <ProjectCard
               key={project.id}
+              id={project.id}
               name={project.name}
               description={project.description}
               progress={project.progress}
