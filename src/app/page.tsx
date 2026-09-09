@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import ProjectCard from "@/components/ProjectCard";
 import Sidebar from "@/components/Sidebar";
 import StatCard from "@/components/StatCard";
 
@@ -11,7 +12,7 @@ export default function Home() {
         <section className="flex-1">
           <Header />
 
-          <div className="p-8">
+          <div className="space-y-8 p-8">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 title="Proyectos activos"
@@ -37,6 +38,52 @@ export default function Home() {
                 description="Tareas fuera de la fecha límite"
               />
             </div>
+
+            <section>
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-white">
+                  Proyectos recientes
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  Seguimiento de los proyectos en los que estás trabajando.
+                </p>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ProjectCard
+                  name="Sitio corporativo"
+                  description="Rediseño y desarrollo del sitio principal de la empresa."
+                  progress={75}
+                  tasksCompleted={15}
+                  totalTasks={20}
+                />
+
+                <ProjectCard
+                  name="Panel de clientes"
+                  description="Dashboard para consultar usuarios, actividad y métricas."
+                  progress={45}
+                  tasksCompleted={9}
+                  totalTasks={20}
+                />
+
+                <ProjectCard
+                  name="API de inventario"
+                  description="Servicio para administrar productos, existencias y movimientos."
+                  progress={60}
+                  tasksCompleted={12}
+                  totalTasks={20}
+                />
+
+                <ProjectCard
+                  name="Aplicación móvil"
+                  description="Primera versión de la aplicación para seguimiento de pedidos."
+                  progress={30}
+                  tasksCompleted={6}
+                  totalTasks={20}
+                />
+              </div>
+            </section>
           </div>
         </section>
       </div>
