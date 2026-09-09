@@ -37,32 +37,24 @@ export default function TaskList({
   initialTasks,
   projects,
 }: TaskListProps) {
-  const [tasks, setTasks] =
-    useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [priority, setPriority] = useState("all");
 
-  const [isFormOpen, setIsFormOpen] =
-    useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
 
   const [title, setTitle] = useState("");
-  const [projectId, setProjectId] =
-    useState("");
-
+  const [projectId, setProjectId] = useState("");
   const [newStatus, setNewStatus] =
     useState<TaskStatus>("Pendiente");
-
   const [newPriority, setNewPriority] =
     useState<TaskPriority>("Media");
+  const [dueDate, setDueDate] = useState("");
 
-  const [dueDate, setDueDate] =
-    useState("");
-
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const filteredTasks = useMemo(() => {
@@ -85,20 +77,17 @@ export default function TaskList({
         matchesPriority
       );
     });
-  }, [
-    tasks,
-    search,
-    status,
-    priority,
-  ]);
+  }, [tasks, search, status, priority]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
+    const trimmedTitle = title.trim();
+
     if (
-      !title.trim() ||
+      !trimmedTitle ||
       !projectId ||
       !dueDate
     ) {
@@ -112,66 +101,79 @@ export default function TaskList({
     setError("");
 
     try {
-      const response = await fetch(
-        "/api/tasks",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            title: title.trim(),
-            projectId: Number(projectId),
-            status: newStatus,
-            priority: newPriority,
-            dueDate: new Date(
-              `${dueDate}T00:00:00`,
-            ).toISOString(),
-          }),
+      const payload = {
+        title: trimmedTitle,
+        projectId: Number(projectId),
+        status: newStatus,
+        priority: newPriority,
+        dueDate: new Date(
+          `${dueDate}T00:00:00`,
+        ).toISOString(),
+      };
+
+      const endpoint =
+        editingTaskId !== null
+          ? `/api/tasks/${editingTaskId}`
+          : "/api/tasks";
+
+      const method =
+        editingTaskId !== null
+          ? "PATCH"
+          : "POST";
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         throw new Error(
-          "No se pudo crear la tarea.",
+          editingTaskId !== null
+            ? "No se pudo actualizar la tarea."
+            : "No se pudo crear la tarea.",
         );
       }
 
-      const createdTask =
-        await response.json();
+      const savedTask = await response.json();
 
-      const selectedProject =
-        projects.find(
-          (project) =>
-            project.id ===
-            Number(projectId),
-        );
+      const selectedProject = projects.find(
+        (project) =>
+          project.id === Number(projectId),
+      );
 
       if (!selectedProject) {
         throw new Error(
-          "No se encontró el proyecto.",
+          "No se encontró el proyecto seleccionado.",
         );
       }
 
-      const newTask: Task = {
-        id: createdTask.id,
-        title: createdTask.title,
+      const formattedTask: Task = {
+        id: savedTask.id,
+        title: savedTask.title,
         project: selectedProject.name,
-        projectId:
-          createdTask.projectId,
-        status:
-          createdTask.status,
-        priority:
-          createdTask.priority,
-        dueDate:
-          createdTask.dueDate,
+        projectId: savedTask.projectId,
+        status: savedTask.status,
+        priority: savedTask.priority,
+        dueDate: savedTask.dueDate,
       };
 
-      setTasks((currentTasks) => [
-        ...currentTasks,
-        newTask,
-      ]);
+      if (editingTaskId !== null) {
+        setTasks((currentTasks) =>
+          currentTasks.map((task) =>
+            task.id === editingTaskId
+              ? formattedTask
+              : task,
+          ),
+        );
+      } else {
+        setTasks((currentTasks) => [
+          ...currentTasks,
+          formattedTask,
+        ]);
+      }
 
       resetForm();
     } catch {
@@ -183,7 +185,77 @@ export default function TaskList({
     }
   }
 
+  function startCreate() {
+    setEditingTaskId(null);
+    setTitle("");
+    setProjectId("");
+    setNewStatus("Pendiente");
+    setNewPriority("Media");
+    setDueDate("");
+    setError("");
+    setIsFormOpen(true);
+  }
+
+  function startEdit(task: Task) {
+    setEditingTaskId(task.id);
+    setTitle(task.title);
+    setProjectId(String(task.projectId));
+    setNewStatus(task.status);
+    setNewPriority(task.priority);
+
+    const date = new Date(task.dueDate);
+    const localDate = new Date(
+      date.getTime() -
+        date.getTimezoneOffset() * 60000,
+    )
+      .toISOString()
+      .split("T")[0];
+
+    setDueDate(localDate);
+    setError("");
+    setIsFormOpen(true);
+  }
+
+  async function handleDelete(task: Task) {
+    const confirmed = window.confirm(
+      `¿Quieres eliminar la tarea "${task.title}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setError("");
+
+    try {
+      const response = await fetch(
+        `/api/tasks/${task.id}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "No se pudo eliminar la tarea.",
+        );
+      }
+
+      setTasks((currentTasks) =>
+        currentTasks.filter(
+          (currentTask) =>
+            currentTask.id !== task.id,
+        ),
+      );
+    } catch {
+      setError(
+        "Ocurrió un problema al eliminar la tarea.",
+      );
+    }
+  }
+
   function resetForm() {
+    setEditingTaskId(null);
     setTitle("");
     setProjectId("");
     setNewStatus("Pendiente");
@@ -208,17 +280,19 @@ export default function TaskList({
 
         <button
           type="button"
-          onClick={() =>
-            setIsFormOpen(true)
-          }
-          disabled={
-            projects.length === 0
-          }
+          onClick={startCreate}
+          disabled={projects.length === 0}
           className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Nueva tarea
         </button>
       </div>
+
+      {error && !isFormOpen && (
+        <p className="rounded-lg border border-rose-900/60 bg-rose-950/20 px-4 py-3 text-sm text-rose-300">
+          {error}
+        </p>
+      )}
 
       {projects.length === 0 && (
         <div className="rounded-xl border border-dashed border-slate-800 p-6 text-sm text-slate-400">
@@ -230,11 +304,15 @@ export default function TaskList({
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
           <div>
             <h3 className="text-lg font-semibold text-white">
-              Crear tarea
+              {editingTaskId !== null
+                ? "Editar tarea"
+                : "Crear tarea"}
             </h3>
 
             <p className="mt-1 text-sm text-slate-400">
-              Agrega la información de la nueva tarea.
+              {editingTaskId !== null
+                ? "Actualiza la información de la tarea."
+                : "Agrega la información de la nueva tarea."}
             </p>
           </div>
 
@@ -255,9 +333,7 @@ export default function TaskList({
                 type="text"
                 value={title}
                 onChange={(event) =>
-                  setTitle(
-                    event.target.value,
-                  )
+                  setTitle(event.target.value)
                 }
                 disabled={isSubmitting}
                 placeholder="Ej. Diseñar página de acceso"
@@ -277,9 +353,7 @@ export default function TaskList({
                 id="task-project"
                 value={projectId}
                 onChange={(event) =>
-                  setProjectId(
-                    event.target.value,
-                  )
+                  setProjectId(event.target.value)
                 }
                 disabled={isSubmitting}
                 className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
@@ -288,16 +362,14 @@ export default function TaskList({
                   Selecciona un proyecto
                 </option>
 
-                {projects.map(
-                  (project) => (
-                    <option
-                      key={project.id}
-                      value={project.id}
-                    >
-                      {project.name}
-                    </option>
-                  ),
-                )}
+                {projects.map((project) => (
+                  <option
+                    key={project.id}
+                    value={project.id}
+                  >
+                    {project.name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -315,8 +387,7 @@ export default function TaskList({
                   value={newStatus}
                   onChange={(event) =>
                     setNewStatus(
-                      event.target
-                        .value as TaskStatus,
+                      event.target.value as TaskStatus,
                     )
                   }
                   disabled={isSubmitting}
@@ -349,8 +420,7 @@ export default function TaskList({
                   value={newPriority}
                   onChange={(event) =>
                     setNewPriority(
-                      event.target
-                        .value as TaskPriority,
+                      event.target.value as TaskPriority,
                     )
                   }
                   disabled={isSubmitting}
@@ -383,9 +453,7 @@ export default function TaskList({
                   type="date"
                   value={dueDate}
                   onChange={(event) =>
-                    setDueDate(
-                      event.target.value,
-                    )
+                    setDueDate(event.target.value)
                   }
                   disabled={isSubmitting}
                   className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
@@ -416,7 +484,9 @@ export default function TaskList({
               >
                 {isSubmitting
                   ? "Guardando..."
-                  : "Crear tarea"}
+                  : editingTaskId !== null
+                    ? "Guardar cambios"
+                    : "Crear tarea"}
               </button>
             </div>
           </form>
@@ -437,9 +507,7 @@ export default function TaskList({
             type="text"
             value={search}
             onChange={(event) =>
-              setSearch(
-                event.target.value,
-              )
+              setSearch(event.target.value)
             }
             placeholder="Buscar por nombre de tarea..."
             className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500"
@@ -458,15 +526,11 @@ export default function TaskList({
             id="status"
             value={status}
             onChange={(event) =>
-              setStatus(
-                event.target.value,
-              )
+              setStatus(event.target.value)
             }
             className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500"
           >
-            <option value="all">
-              Todos
-            </option>
+            <option value="all">Todos</option>
             <option value="Pendiente">
               Pendiente
             </option>
@@ -491,53 +555,38 @@ export default function TaskList({
             id="priority"
             value={priority}
             onChange={(event) =>
-              setPriority(
-                event.target.value,
-              )
+              setPriority(event.target.value)
             }
             className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500"
           >
-            <option value="all">
-              Todas
-            </option>
-            <option value="Alta">
-              Alta
-            </option>
-            <option value="Media">
-              Media
-            </option>
-            <option value="Baja">
-              Baja
-            </option>
+            <option value="all">Todas</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
           </select>
         </div>
       </div>
 
       <section className="rounded-xl border border-slate-800 bg-slate-900 px-5">
         {filteredTasks.length > 0 ? (
-          filteredTasks.map(
-            (task) => (
-              <TaskItem
-                key={task.id}
-                title={task.title}
-                project={task.project}
-                status={task.status}
-                priority={task.priority}
-                dueDate={
-                  new Date(
-                    task.dueDate,
-                  ).toLocaleDateString(
-                    "es-MX",
-                    {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    },
-                  )
-                }
-              />
-            ),
-          )
+          filteredTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              title={task.title}
+              project={task.project}
+              status={task.status}
+              priority={task.priority}
+              dueDate={new Date(
+                task.dueDate,
+              ).toLocaleDateString("es-MX", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+              onEdit={() => startEdit(task)}
+              onDelete={() => handleDelete(task)}
+            />
+          ))
         ) : (
           <p className="py-8 text-center text-sm text-slate-500">
             No se encontraron tareas.

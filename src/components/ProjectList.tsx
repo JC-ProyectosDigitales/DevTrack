@@ -20,7 +20,9 @@ export default function ProjectList({
   initialProjects,
 }: ProjectListProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -28,9 +30,7 @@ export default function ProjectList({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedName = name.trim();
@@ -45,52 +45,131 @@ export default function ProjectList({
     setError("");
 
     try {
-      const response = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: trimmedName,
-          description: trimmedDescription,
-        }),
-      });
+      if (editingProjectId !== null) {
+        const response = await fetch(`/api/projects/${editingProjectId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: trimmedName,
+            description: trimmedDescription,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error("No se pudo crear el proyecto.");
+        if (!response.ok) {
+          throw new Error("No se pudo actualizar el proyecto.");
+        }
+
+        const updatedProject = await response.json();
+
+        setProjects((currentProjects) =>
+          currentProjects.map((project) =>
+            project.id === editingProjectId
+              ? {
+                  ...project,
+                  name: updatedProject.name,
+                  description: updatedProject.description,
+                }
+              : project,
+          ),
+        );
+      } else {
+        const response = await fetch("/api/projects", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: trimmedName,
+            description: trimmedDescription,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("No se pudo crear el proyecto.");
+        }
+
+        const createdProject = await response.json();
+
+        const newProject: Project = {
+          id: createdProject.id,
+          name: createdProject.name,
+          description: createdProject.description,
+          progress: 0,
+          tasksCompleted: 0,
+          totalTasks: 0,
+        };
+
+        setProjects((currentProjects) => [...currentProjects, newProject]);
       }
 
-      const createdProject = await response.json();
-
-      const newProject: Project = {
-        id: createdProject.id,
-        name: createdProject.name,
-        description: createdProject.description,
-        progress: 0,
-        tasksCompleted: 0,
-        totalTasks: 0,
-      };
-
-      setProjects((currentProjects) => [
-        ...currentProjects,
-        newProject,
-      ]);
-
-      setName("");
-      setDescription("");
-      setIsFormOpen(false);
+      resetForm();
     } catch {
-      setError(
-        "Ocurrió un problema al guardar el proyecto.",
-      );
+      setError("Ocurrió un problema al guardar el proyecto.");
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  function handleCancel() {
+  function startCreate() {
+    setEditingProjectId(null);
     setName("");
     setDescription("");
+    setError("");
+    setIsFormOpen(true);
+  }
+
+  function startEdit(project: Project) {
+    setEditingProjectId(project.id);
+    setName(project.name);
+    setDescription(project.description);
+    setError("");
+    setIsFormOpen(true);
+  }
+
+  async function handleDelete(project: Project) {
+    const confirmed = window.confirm(
+      `¿Quieres eliminar el proyecto "${project.name}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setError("");
+
+    try {
+      const response = await fetch(`/api/projects/${project.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const body = await response.json();
+
+        setError(
+          typeof body.message === "string"
+            ? body.message
+            : "No se pudo eliminar el proyecto.",
+        );
+
+        return;
+      }
+
+      setProjects((currentProjects) =>
+        currentProjects.filter(
+          (currentProject) => currentProject.id !== project.id,
+        ),
+      );
+    } catch {
+      setError("Ocurrió un problema al eliminar el proyecto.");
+    }
+  }
+
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setEditingProjectId(null);
     setError("");
     setIsFormOpen(false);
   }
@@ -110,29 +189,36 @@ export default function ProjectList({
 
         <button
           type="button"
-          onClick={() => setIsFormOpen(true)}
+          onClick={startCreate}
           className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
         >
           Nuevo proyecto
         </button>
       </div>
 
+      {error && !isFormOpen && (
+        <p className="rounded-lg border border-rose-900/60 bg-rose-950/20 px-4 py-3 text-sm text-rose-300">
+          {error}
+        </p>
+      )}
+
       {isFormOpen && (
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
           <div>
             <h3 className="text-lg font-semibold text-white">
-              Crear proyecto
+              {editingProjectId !== null
+                ? "Editar proyecto"
+                : "Crear proyecto"}
             </h3>
 
             <p className="mt-1 text-sm text-slate-400">
-              Agrega la información básica del nuevo proyecto.
+              {editingProjectId !== null
+                ? "Actualiza la información del proyecto."
+                : "Agrega la información básica del nuevo proyecto."}
             </p>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="mt-5 space-y-4"
-          >
+          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <div>
               <label
                 htmlFor="project-name"
@@ -145,9 +231,7 @@ export default function ProjectList({
                 id="project-name"
                 type="text"
                 value={name}
-                onChange={(event) =>
-                  setName(event.target.value)
-                }
+                onChange={(event) => setName(event.target.value)}
                 placeholder="Ej. Portal de proveedores"
                 disabled={isSubmitting}
                 className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500 disabled:opacity-60"
@@ -165,9 +249,7 @@ export default function ProjectList({
               <textarea
                 id="project-description"
                 value={description}
-                onChange={(event) =>
-                  setDescription(event.target.value)
-                }
+                onChange={(event) => setDescription(event.target.value)}
                 placeholder="Describe brevemente el objetivo del proyecto."
                 rows={4}
                 disabled={isSubmitting}
@@ -176,15 +258,13 @@ export default function ProjectList({
             </div>
 
             {error && (
-              <p className="text-sm text-rose-300">
-                {error}
-              </p>
+              <p className="text-sm text-rose-300">{error}</p>
             )}
 
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                onClick={handleCancel}
+                onClick={resetForm}
                 disabled={isSubmitting}
                 className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-60"
               >
@@ -198,7 +278,9 @@ export default function ProjectList({
               >
                 {isSubmitting
                   ? "Guardando..."
-                  : "Crear proyecto"}
+                  : editingProjectId !== null
+                    ? "Guardar cambios"
+                    : "Crear proyecto"}
               </button>
             </div>
           </form>
@@ -215,6 +297,8 @@ export default function ProjectList({
               progress={project.progress}
               tasksCompleted={project.tasksCompleted}
               totalTasks={project.totalTasks}
+              onEdit={() => startEdit(project)}
+              onDelete={() => handleDelete(project)}
             />
           ))}
         </div>

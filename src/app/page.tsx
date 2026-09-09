@@ -7,7 +7,7 @@ import { db } from "@/prisma/db";
 
 export default async function Home() {
   const projects = await db.orm.public.Project.all();
-  const tasks = await db.orm.public.Task.include("project").all();
+  const tasks = await db.orm.public.Task.all();
 
   const completedTasks = tasks.filter(
     (task) => task.status === "Completada",
@@ -95,20 +95,25 @@ export default async function Home() {
                 <div className="grid gap-4 lg:grid-cols-2">
                   {recentProjects.map((project) => {
                     const projectTasks = tasks.filter(
-                      (task) => task.projectId === project.id,
+                      (task) =>
+                        task.projectId === project.id,
                     );
 
                     const completedProjectTasks =
                       projectTasks.filter(
-                        (task) => task.status === "Completada",
+                        (task) =>
+                          task.status === "Completada",
                       ).length;
 
-                    const totalTasks = projectTasks.length;
+                    const totalTasks =
+                      projectTasks.length;
 
                     const progress =
                       totalTasks > 0
                         ? Math.round(
-                            (completedProjectTasks / totalTasks) * 100,
+                            (completedProjectTasks /
+                              totalTasks) *
+                              100,
                           )
                         : 0;
 
@@ -116,9 +121,13 @@ export default async function Home() {
                       <ProjectCard
                         key={project.id}
                         name={project.name}
-                        description={project.description}
+                        description={
+                          project.description
+                        }
                         progress={progress}
-                        tasksCompleted={completedProjectTasks}
+                        tasksCompleted={
+                          completedProjectTasks
+                        }
                         totalTasks={totalTasks}
                       />
                     );
@@ -146,32 +155,47 @@ export default async function Home() {
 
               <div className="mt-4">
                 {recentTasks.length > 0 ? (
-                  recentTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      title={task.title}
-                      project={task.project.name}
-                      status={
-                        task.status as
-                          | "Pendiente"
-                          | "En progreso"
-                          | "Completada"
-                      }
-                      priority={
-                        task.priority as
-                          | "Alta"
-                          | "Media"
-                          | "Baja"
-                      }
-                      dueDate={new Date(
-                        task.dueDate,
-                      ).toLocaleDateString("es-MX", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    />
-                  ))
+                  recentTasks.map((task) => {
+                    const project =
+                      projects.find(
+                        (project) =>
+                          project.id ===
+                          task.projectId,
+                      );
+
+                    return (
+                      <TaskItem
+                        key={task.id}
+                        title={task.title}
+                        project={
+                          project?.name ??
+                          "Proyecto no encontrado"
+                        }
+                        status={
+                          task.status as
+                            | "Pendiente"
+                            | "En progreso"
+                            | "Completada"
+                        }
+                        priority={
+                          task.priority as
+                            | "Alta"
+                            | "Media"
+                            | "Baja"
+                        }
+                        dueDate={new Date(
+                          task.dueDate,
+                        ).toLocaleDateString(
+                          "es-MX",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )}
+                      />
+                    );
+                  })
                 ) : (
                   <p className="py-8 text-center text-sm text-slate-500">
                     Todavía no hay tareas registradas.

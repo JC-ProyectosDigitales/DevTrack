@@ -5,31 +5,42 @@ import { db } from "@/prisma/db";
 
 export default async function TasksPage() {
   const databaseTasks =
-    await db.orm.public.Task.include("project").all();
+    await db.orm.public.Task.all();
 
   const databaseProjects =
     await db.orm.public.Project.all();
 
-  const tasks = databaseTasks.map((task) => ({
-    id: task.id,
-    title: task.title,
-    project: task.project.name,
-    projectId: task.projectId,
-    status: task.status as
-      | "Pendiente"
-      | "En progreso"
-      | "Completada",
-    priority: task.priority as
-      | "Alta"
-      | "Media"
-      | "Baja",
-    dueDate: task.dueDate,
-  }));
+  const projects = databaseProjects.map(
+    (project) => ({
+      id: project.id,
+      name: project.name,
+    }),
+  );
 
-  const projects = databaseProjects.map((project) => ({
-    id: project.id,
-    name: project.name,
-  }));
+  const tasks = databaseTasks.map((task) => {
+    const project = databaseProjects.find(
+      (project) =>
+        project.id === task.projectId,
+    );
+
+    return {
+      id: task.id,
+      title: task.title,
+      project:
+        project?.name ??
+        "Proyecto no encontrado",
+      projectId: task.projectId,
+      status: task.status as
+        | "Pendiente"
+        | "En progreso"
+        | "Completada",
+      priority: task.priority as
+        | "Alta"
+        | "Media"
+        | "Baja",
+      dueDate: task.dueDate,
+    };
+  });
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
