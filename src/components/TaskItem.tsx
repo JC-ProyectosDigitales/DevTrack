@@ -6,6 +6,18 @@ type TaskItemProps = {
   dueDate: string;
 };
 
+const statusStyles = {
+  Pendiente: "bg-amber-500/10 text-amber-300",
+  "En progreso": "bg-sky-500/10 text-sky-300",
+  Completada: "bg-emerald-500/10 text-emerald-300",
+};
+
+const priorityStyles = {
+  Alta: "text-rose-300",
+  Media: "text-amber-300",
+  Baja: "text-slate-300",
+};
+
 export default function TaskItem({
   title,
   project,
@@ -22,12 +34,15 @@ export default function TaskItem({
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <span className="rounded-full bg-slate-800 px-3 py-1 text-slate-300">
+        <span
+          className={`rounded-full px-3 py-1 font-medium ${statusStyles[status]}`}
+        >
           {status}
         </span>
 
         <span className="text-slate-400">
-          Prioridad: <span className="text-slate-200">{priority}</span>
+          Prioridad:{" "}
+          <span className={priorityStyles[priority]}>{priority}</span>
         </span>
 
         <span className="text-slate-500">{dueDate}</span>
