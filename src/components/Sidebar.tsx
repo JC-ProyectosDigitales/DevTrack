@@ -22,6 +22,10 @@ const navigationItems = [
     label: "Tareas",
     href: "/tasks",
   },
+  {
+    label: "Mi perfil",
+    href: "/profile",
+  },
 ];
 
 export default function Sidebar({
