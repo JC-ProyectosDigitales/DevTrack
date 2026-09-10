@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import TaskItem from "@/components/TaskItem";
+import { requireUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 type ProjectDetailPageProps = {
@@ -15,6 +16,8 @@ type ProjectDetailPageProps = {
 export default async function ProjectDetailPage({
   params,
 }: ProjectDetailPageProps) {
+  const user = await requireUser();
+
   const { id } = await params;
   const projectId = Number(id);
 
@@ -22,9 +25,12 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const project = await db.orm.public.Project.first({
-    id: projectId,
-  });
+  const project = await db.orm.public.Project
+    .where({
+      id: projectId,
+      ownerId: user.id,
+    })
+    .first();
 
   if (!project) {
     notFound();
@@ -32,7 +38,7 @@ export default async function ProjectDetailPage({
 
   const tasks = await db.orm.public.Task
     .where({
-      projectId,
+      projectId: project.id,
     })
     .all();
 
@@ -44,15 +50,16 @@ export default async function ProjectDetailPage({
 
   const progress =
     totalTasks > 0
-      ? Math.round(
-          (completedTasks / totalTasks) * 100,
-        )
+      ? Math.round((completedTasks / totalTasks) * 100)
       : 0;
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
-        <Sidebar />
+        <Sidebar
+          userName={user.name}
+          userEmail={user.email}
+        />
 
         <section className="flex-1">
           <Header
@@ -62,19 +69,19 @@ export default async function ProjectDetailPage({
 
           <div className="space-y-8 p-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <Link
-                    href="/projects"
-                    className="text-sm text-slate-400 hover:text-white"
-                >
-                    &larr; Volver a proyectos
-                </Link>
+              <Link
+                href="/projects"
+                className="text-sm text-slate-400 hover:text-white"
+              >
+                ← Volver a proyectos
+              </Link>
 
-                <Link
-                    href={`/tasks?projectId=${project.id}`}
-                    className="rounded-lg bg-white px-4 py-2 text-sm font-medium -text-slate-950 hover:bg-slate-200"
-                >
-                    Nueva tarea
-                </Link>
+              <Link
+                href={`/tasks?projectId=${project.id}`}
+                className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
+              >
+                Nueva tarea
+              </Link>
             </div>
 
             <section className="grid gap-4 md:grid-cols-3">

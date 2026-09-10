@@ -1,0 +1,28 @@
+[
+  {
+    "id": "project.ownerId.require",
+    "label": "Require project owner",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Confirm no projects have a null owner",
+        "sql": "\n              SELECT NOT EXISTS (\n                SELECT 1\n                FROM \"public\".\"project\"\n                WHERE \"ownerId\" IS NULL\n              ) AS ok\n            "
+      }
+    ],
+    "execute": [
+      {
+        "description": "Set project ownerId as NOT NULL",
+        "sql": "\n              ALTER TABLE \"public\".\"project\"\n              ALTER COLUMN \"ownerId\" SET NOT NULL\n            "
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Confirm project ownerId is required",
+        "sql": "\n              SELECT is_nullable = 'NO' AS ok\n              FROM information_schema.columns\n              WHERE table_schema = 'public'\n                AND table_name = 'project'\n                AND column_name = 'ownerId'\n            "
+      }
+    ]
+  }
+]

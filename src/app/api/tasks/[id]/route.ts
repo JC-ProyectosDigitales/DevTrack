@@ -1,3 +1,4 @@
+import { getSession } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 type RouteContext = {
@@ -10,6 +11,19 @@ export async function PATCH(
   request: Request,
   context: RouteContext,
 ) {
+  const session = await getSession();
+
+  if (!session) {
+    return Response.json(
+      {
+        message: "No autorizado.",
+      },
+      {
+        status: 401,
+      },
+    );
+  }
+
   const { id } = await context.params;
   const taskId = Number(id);
 
@@ -20,6 +34,39 @@ export async function PATCH(
       },
       {
         status: 400,
+      },
+    );
+  }
+
+  const task = await db.orm.public.Task.first({
+    id: taskId,
+  });
+
+  if (!task) {
+    return Response.json(
+      {
+        message: "Tarea no encontrada.",
+      },
+      {
+        status: 404,
+      },
+    );
+  }
+
+  const currentProject = await db.orm.public.Project
+    .where({
+      id: task.projectId,
+      ownerId: session.userId,
+    })
+    .first();
+
+  if (!currentProject) {
+    return Response.json(
+      {
+        message: "Tarea no encontrada.",
+      },
+      {
+        status: 404,
       },
     );
   }
@@ -65,28 +112,14 @@ export async function PATCH(
     );
   }
 
-  const task =
-    await db.orm.public.Task.first({
-      id: taskId,
-    });
-
-  if (!task) {
-    return Response.json(
-      {
-        message: "Tarea no encontrada.",
-      },
-      {
-        status: 404,
-      },
-    );
-  }
-
-  const project =
-    await db.orm.public.Project.first({
+  const targetProject = await db.orm.public.Project
+    .where({
       id: projectId,
-    });
+      ownerId: session.userId,
+    })
+    .first();
 
-  if (!project) {
+  if (!targetProject) {
     return Response.json(
       {
         message: "Proyecto no encontrado.",
@@ -97,18 +130,17 @@ export async function PATCH(
     );
   }
 
-  const updatedTask =
-    await db.orm.public.Task
-      .where({
-        id: taskId,
-      })
-      .update({
-        title,
-        status,
-        priority,
-        dueDate,
-        projectId,
-      });
+  const updatedTask = await db.orm.public.Task
+    .where({
+      id: task.id,
+    })
+    .update({
+      title,
+      status,
+      priority,
+      dueDate,
+      projectId: targetProject.id,
+    });
 
   return Response.json(updatedTask);
 }
@@ -117,6 +149,19 @@ export async function DELETE(
   _request: Request,
   context: RouteContext,
 ) {
+  const session = await getSession();
+
+  if (!session) {
+    return Response.json(
+      {
+        message: "No autorizado.",
+      },
+      {
+        status: 401,
+      },
+    );
+  }
+
   const { id } = await context.params;
   const taskId = Number(id);
 
@@ -131,10 +176,9 @@ export async function DELETE(
     );
   }
 
-  const task =
-    await db.orm.public.Task.first({
-      id: taskId,
-    });
+  const task = await db.orm.public.Task.first({
+    id: taskId,
+  });
 
   if (!task) {
     return Response.json(
@@ -147,9 +191,27 @@ export async function DELETE(
     );
   }
 
+  const project = await db.orm.public.Project
+    .where({
+      id: task.projectId,
+      ownerId: session.userId,
+    })
+    .first();
+
+  if (!project) {
+    return Response.json(
+      {
+        message: "Tarea no encontrada.",
+      },
+      {
+        status: 404,
+      },
+    );
+  }
+
   await db.orm.public.Task
     .where({
-      id: taskId,
+      id: task.id,
     })
     .delete();
 

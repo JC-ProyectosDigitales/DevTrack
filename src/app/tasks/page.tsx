@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import TaskList from "@/components/TaskList";
+import { requireUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 type TasksPageProps = {
@@ -12,33 +13,39 @@ type TasksPageProps = {
 export default async function TasksPage({
   searchParams,
 }: TasksPageProps) {
+  const user = await requireUser();
   const { projectId } = await searchParams;
 
-  const databaseTasks =
-    await db.orm.public.Task.all();
+  const databaseProjects = await db.orm.public.Project
+    .where({
+      ownerId: user.id,
+    })
+    .all();
 
-  const databaseProjects =
-    await db.orm.public.Project.all();
-
-  const projects = databaseProjects.map(
-    (project) => ({
-      id: project.id,
-      name: project.name,
-    }),
+  const projectIds = databaseProjects.map(
+    (project) => project.id,
   );
 
-  const tasks = databaseTasks.map((task) => {
+  const databaseTasks = await db.orm.public.Task.all();
+
+  const userTasks = databaseTasks.filter((task) =>
+    projectIds.includes(task.projectId),
+  );
+
+  const projects = databaseProjects.map((project) => ({
+    id: project.id,
+    name: project.name,
+  }));
+
+  const tasks = userTasks.map((task) => {
     const project = databaseProjects.find(
-      (project) =>
-        project.id === task.projectId,
+      (project) => project.id === task.projectId,
     );
 
     return {
       id: task.id,
       title: task.title,
-      project:
-        project?.name ??
-        "Proyecto no encontrado",
+      project: project?.name ?? "Proyecto no encontrado",
       projectId: task.projectId,
       status: task.status as
         | "Pendiente"
@@ -52,16 +59,23 @@ export default async function TasksPage({
     };
   });
 
+  const requestedProjectId = Number(projectId);
+
   const initialProjectId =
-    projectId &&
-    Number.isInteger(Number(projectId))
-      ? Number(projectId)
+    Number.isInteger(requestedProjectId) &&
+    databaseProjects.some(
+      (project) => project.id === requestedProjectId,
+    )
+      ? requestedProjectId
       : null;
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
-        <Sidebar />
+        <Sidebar
+          userName={user.name}
+          userEmail={user.email}
+        />
 
         <section className="flex-1">
           <Header
@@ -73,9 +87,7 @@ export default async function TasksPage({
             <TaskList
               initialTasks={tasks}
               projects={projects}
-              initialProjectId={
-                initialProjectId
-              }
+              initialProjectId={initialProjectId}
             />
           </div>
         </section>

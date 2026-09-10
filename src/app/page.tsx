@@ -3,11 +3,27 @@ import ProjectCard from "@/components/ProjectCard";
 import Sidebar from "@/components/Sidebar";
 import StatCard from "@/components/StatCard";
 import TaskItem from "@/components/TaskItem";
+import { requireUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 export default async function Home() {
-  const projects = await db.orm.public.Project.all();
-  const tasks = await db.orm.public.Task.all();
+  const user = await requireUser();
+
+  const projects = await db.orm.public.Project
+    .where({
+      ownerId: user.id,
+    })
+    .all();
+
+  const projectIds = projects.map(
+    (project) => project.id,
+  );
+
+  const allTasks = await db.orm.public.Task.all();
+
+  const tasks = allTasks.filter((task) =>
+    projectIds.includes(task.projectId),
+  );
 
   const completedTasks = tasks.filter(
     (task) => task.status === "Completada",
@@ -48,7 +64,10 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
-        <Sidebar />
+        <Sidebar
+          userName={user.name}
+          userEmail={user.email}
+        />
 
         <section className="flex-1">
           <Header />
@@ -124,7 +143,9 @@ export default async function Home() {
                         name={project.name}
                         description={project.description}
                         progress={progress}
-                        tasksCompleted={completedProjectTasks}
+                        tasksCompleted={
+                          completedProjectTasks
+                        }
                         totalTasks={totalTasks}
                       />
                     );

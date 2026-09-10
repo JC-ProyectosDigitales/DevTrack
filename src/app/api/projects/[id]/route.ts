@@ -1,3 +1,4 @@
+import { getSession } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 type RouteContext = {
@@ -10,6 +11,19 @@ export async function PATCH(
   request: Request,
   context: RouteContext,
 ) {
+  const session = await getSession();
+
+  if (!session) {
+    return Response.json(
+      {
+        message: "No autorizado.",
+      },
+      {
+        status: 401,
+      },
+    );
+  }
+
   const { id } = await context.params;
   const projectId = Number(id);
 
@@ -20,6 +34,24 @@ export async function PATCH(
       },
       {
         status: 400,
+      },
+    );
+  }
+
+  const project = await db.orm.public.Project
+    .where({
+      id: projectId,
+      ownerId: session.userId,
+    })
+    .first();
+
+  if (!project) {
+    return Response.json(
+      {
+        message: "Proyecto no encontrado.",
+      },
+      {
+        status: 404,
       },
     );
   }
@@ -39,7 +71,8 @@ export async function PATCH(
   if (!name || !description) {
     return Response.json(
       {
-        message: "El nombre y la descripción son obligatorios.",
+        message:
+          "El nombre y la descripción son obligatorios.",
       },
       {
         status: 400,
@@ -47,31 +80,15 @@ export async function PATCH(
     );
   }
 
-  const project =
-    await db.orm.public.Project.first({
-      id: projectId,
+  const updatedProject = await db.orm.public.Project
+    .where({
+      id: project.id,
+      ownerId: session.userId,
+    })
+    .update({
+      name,
+      description,
     });
-
-  if (!project) {
-    return Response.json(
-      {
-        message: "Proyecto no encontrado.",
-      },
-      {
-        status: 404,
-      },
-    );
-  }
-
-  const updatedProject =
-    await db.orm.public.Project
-      .where({
-        id: projectId,
-      })
-      .update({
-        name,
-        description,
-      });
 
   return Response.json(updatedProject);
 }
@@ -80,6 +97,19 @@ export async function DELETE(
   _request: Request,
   context: RouteContext,
 ) {
+  const session = await getSession();
+
+  if (!session) {
+    return Response.json(
+      {
+        message: "No autorizado.",
+      },
+      {
+        status: 401,
+      },
+    );
+  }
+
   const { id } = await context.params;
   const projectId = Number(id);
 
@@ -94,10 +124,12 @@ export async function DELETE(
     );
   }
 
-  const project =
-    await db.orm.public.Project.first({
+  const project = await db.orm.public.Project
+    .where({
       id: projectId,
-    });
+      ownerId: session.userId,
+    })
+    .first();
 
   if (!project) {
     return Response.json(
@@ -110,12 +142,11 @@ export async function DELETE(
     );
   }
 
-  const projectTasks =
-    await db.orm.public.Task
-      .where({
-        projectId,
-      })
-      .all();
+  const projectTasks = await db.orm.public.Task
+    .where({
+      projectId: project.id,
+    })
+    .all();
 
   if (projectTasks.length > 0) {
     return Response.json(
@@ -131,7 +162,8 @@ export async function DELETE(
 
   await db.orm.public.Project
     .where({
-      id: projectId,
+      id: project.id,
+      ownerId: session.userId,
     })
     .delete();
 

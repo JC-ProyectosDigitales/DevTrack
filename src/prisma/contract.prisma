@@ -1,10 +1,25 @@
 // use prisma-next
 
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passwordHash String
+  projects     Project[]
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+}
+
 model Project {
   id          Int      @id @default(autoincrement())
   name        String
   description String
+
+  ownerId     Int
+  owner       User    @relation(fields: [ownerId], references: [id])
+
   tasks       Task[]
+
   createdAt   TimestamptzString @default(now())
   updatedAt   temporal.updatedAtString()
 }

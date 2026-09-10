@@ -1,10 +1,18 @@
 import Header from "@/components/Header";
 import ProjectList from "@/components/ProjectList";
 import Sidebar from "@/components/Sidebar";
+import { requireUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 export default async function ProjectsPage() {
-  const databaseProjects = await db.orm.public.Project.all();
+  const user = await requireUser();
+
+  const databaseProjects = await db.orm.public.Project
+    .where({
+      ownerId: user.id,
+    })
+    .all();
+
   const databaseTasks = await db.orm.public.Task.all();
 
   const projects = databaseProjects.map((project) => {
@@ -36,7 +44,10 @@ export default async function ProjectsPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
-        <Sidebar />
+        <Sidebar
+          userName={user.name}
+          userEmail={user.email}
+        />
 
         <section className="flex-1">
           <Header
