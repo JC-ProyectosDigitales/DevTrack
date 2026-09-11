@@ -64,6 +64,7 @@ export default function TaskList({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
@@ -107,6 +108,7 @@ export default function TaskList({
 
     setIsSubmitting(true);
     setError("");
+    setSuccess("");
 
     try {
       const payload = {
@@ -176,11 +178,15 @@ export default function TaskList({
               : task,
           ),
         );
+
+        setSuccess("Tarea actualizada correctamente.");
       } else {
         setTasks((currentTasks) => [
           ...currentTasks,
           formattedTask,
         ]);
+        
+        setSuccess("Tarea creada correctamente.");
       }
 
       resetForm();
@@ -202,6 +208,7 @@ export default function TaskList({
     setDueDate("");
     setError("");
     setIsFormOpen(true);
+    setSuccess("");
   }
 
   function startEdit(task: Task) {
@@ -210,6 +217,7 @@ export default function TaskList({
     setProjectId(String(task.projectId));
     setNewStatus(task.status);
     setNewPriority(task.priority);
+    setSuccess("");
 
     const date = new Date(task.dueDate);
     const localDate = new Date(
@@ -234,6 +242,7 @@ export default function TaskList({
     }
 
     setError("");
+    setSuccess("");
 
     try {
       const response = await fetch(
@@ -255,6 +264,7 @@ export default function TaskList({
             currentTask.id !== task.id,
         ),
       );
+      setSuccess("Tarea eliminada correctamente.");
     } catch {
       setError(
         "Ocurrió un problema al eliminar la tarea.",
@@ -299,6 +309,12 @@ export default function TaskList({
       {error && !isFormOpen && (
         <p className="rounded-lg border border-rose-900/60 bg-rose-950/20 px-4 py-3 text-sm text-rose-300">
           {error}
+        </p>
+      )}
+
+      {success && !isFormOpen && (
+        <p className="rounded-lg border border-emerald-900/60 bg-emerald-950/20 px-4 py-3 text-sm text-emerald-300">
+          {success}
         </p>
       )}
 
@@ -576,29 +592,41 @@ export default function TaskList({
       </div>
 
       <section className="rounded-xl border border-slate-800 bg-slate-900 px-5">
-        {filteredTasks.length > 0 ? (
-          filteredTasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              title={task.title}
-              project={task.project}
-              status={task.status}
-              priority={task.priority}
-              dueDate={new Date(
-                task.dueDate,
-              ).toLocaleDateString("es-MX", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
-              onEdit={() => startEdit(task)}
-              onDelete={() => handleDelete(task)}
-            />
-          ))
-        ) : (
-          <p className="py-8 text-center text-sm text-slate-500">
-            No se encontraron tareas.
-          </p>
+        {filteredTasks.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 px-6 py-10 text-center">
+                  <h3 className="text-base font-medium text-white">
+                    No hay tareas para mostrar
+                  </h3>
+
+                  <p className="mt-2 text-sm text-slate-400">
+                    {tasks.length === 0
+                      ? "Todavía no has creado ninguna tarea."
+                      : "No hay tareas que coincidan con los filtros seleccionados."}
+                  </p>
+
+                  {tasks.length === 0 && (
+                    <button
+                      type="button"
+                      onClick={startCreate}
+                      className="mt-5 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
+                    >
+                        Crear primera tarea
+                    </button>
+                  )}
+                </div>
+              ) : (
+                filteredTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  title={task.title}
+                  project={task.project}
+                  status={task.status}
+                  priority={task.priority}
+                  dueDate={new Date(task.dueDate).toLocaleDateString("es-MX")}
+                  onEdit={() => startEdit(task)}
+                  onDelete={() => handleDelete(task)}
+                />
+              ))
         )}
       </section>
     </>

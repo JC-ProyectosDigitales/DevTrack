@@ -29,6 +29,7 @@ export default function ProjectList({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,6 +44,7 @@ export default function ProjectList({
 
     setIsSubmitting(true);
     setError("");
+    setSuccess("");
 
     try {
       if (editingProjectId !== null) {
@@ -74,6 +76,8 @@ export default function ProjectList({
               : project,
           ),
         );
+
+        setSuccess("Proyecto actualizado correctamente.");
       } else {
         const response = await fetch("/api/projects", {
           method: "POST",
@@ -101,7 +105,12 @@ export default function ProjectList({
           totalTasks: 0,
         };
 
-        setProjects((currentProjects) => [...currentProjects, newProject]);
+        setProjects((currentProjects) => [
+          ...currentProjects,
+          newProject,
+        ]);
+
+        setSuccess("Proyecto creado correctamente.");
       }
 
       resetForm();
@@ -117,6 +126,7 @@ export default function ProjectList({
     setName("");
     setDescription("");
     setError("");
+    setSuccess("");
     setIsFormOpen(true);
   }
 
@@ -125,6 +135,7 @@ export default function ProjectList({
     setName(project.name);
     setDescription(project.description);
     setError("");
+    setSuccess("");
     setIsFormOpen(true);
   }
 
@@ -138,6 +149,7 @@ export default function ProjectList({
     }
 
     setError("");
+    setSuccess("");
 
     try {
       const response = await fetch(`/api/projects/${project.id}`, {
@@ -161,6 +173,8 @@ export default function ProjectList({
           (currentProject) => currentProject.id !== project.id,
         ),
       );
+
+      setSuccess("Proyecto eliminado correctamente.");
     } catch {
       setError("Ocurrió un problema al eliminar el proyecto.");
     }
@@ -199,6 +213,12 @@ export default function ProjectList({
       {error && !isFormOpen && (
         <p className="rounded-lg border border-rose-900/60 bg-rose-950/20 px-4 py-3 text-sm text-rose-300">
           {error}
+        </p>
+      )}
+
+      {success && !isFormOpen && (
+        <p className="rounded-lg border border-emerald-900/60 bg-emerald-950/20 px-4 py-3 text-sm text-emerald-300">
+          {success}
         </p>
       )}
 
@@ -258,7 +278,9 @@ export default function ProjectList({
             </div>
 
             {error && (
-              <p className="text-sm text-rose-300">{error}</p>
+              <p className="text-sm text-rose-300">
+                {error}
+              </p>
             )}
 
             <div className="flex justify-end gap-3">
