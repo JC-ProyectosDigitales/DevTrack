@@ -5,6 +5,7 @@ import StatCard from "@/components/StatCard";
 import TaskItem from "@/components/TaskItem";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
+import Link from "next/link";
 
 export default async function Home() {
   const user = await requireUser();
@@ -35,14 +36,20 @@ export default async function Home() {
       task.status === "En progreso",
   ).length;
 
-  const now = new Date();
+  const today = new Date();
+  
+  today.setHours(0, 0, 0, 0);
 
   const overdueTasks = tasks.filter((task) => {
     if (task.status === "Completada") {
       return false;
     }
 
-    return new Date(task.dueDate) < now;
+    const dueDate= new Date(task.dueDate);
+
+    dueDate.setHours(0, 0, 0, 0);
+
+    return dueDate < today;
   }).length;
 
   const recentProjects = [...projects]
@@ -53,7 +60,8 @@ export default async function Home() {
     )
     .slice(0, 4);
 
-  const recentTasks = [...tasks]
+  const upcomingTasks = tasks
+    .filter((task) => task.status !== "Completada")
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() -
@@ -75,7 +83,7 @@ export default async function Home() {
           <div className="space-y-8 p-8">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
-                title="Proyectos activos"
+                title="Total de proyectos"
                 value={projects.length}
                 description="Proyectos registrados"
               />
@@ -100,14 +108,25 @@ export default async function Home() {
             </div>
 
             <section>
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold text-white">
-                  Proyectos recientes
-                </h2>
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">
+                    Proyectos recientes
+                  </h2>
 
-                <p className="mt-1 text-sm text-slate-400">
-                  Seguimiento de los proyectos en los que estás trabajando.
-                </p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Seguimiento de los proyectos en los que estás trabajando.
+                  </p>
+                </div>
+
+                {projects.length > 0 && (
+                  <Link
+                    href="/projects"
+                    className="shrink-0 text-sm font-medium text-slate-300 hover:text-white"
+                  >
+                    Ver todos
+                  </Link>
+                )}
               </div>
 
               {recentProjects.length > 0 ? (
@@ -152,28 +171,50 @@ export default async function Home() {
                   })}
                 </div>
               ) : (
-                <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center">
-                  <p className="text-sm text-slate-500">
-                    Todavía no hay proyectos registrados.
+                <div className="rounded-xl border-dashed border-slate-800 p-8 text-center">
+                  <h3 className="font-medium text-white">
+                    Todavía no tienes proyectos.
+                  </h3>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    Crea tu primer proyecto para empezar a organizar tus tareas.
                   </p>
+
+                  <Link
+                    href="/projects/new"
+                    className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
+                  >
+                    Crear proyecto
+                  </Link>
                 </div>
               )}
             </section>
 
             <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-              <div className="mb-2">
-                <h2 className="text-xl font-semibold text-white">
-                  Tareas recientes
-                </h2>
+              <div className="mb-2 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">
+                    Próximas tareas
+                  </h2>
 
-                <p className="mt-1 text-sm text-slate-400">
-                  Actividades que requieren seguimiento.
-                </p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Tareas pendientes ordenadas por fecha límite.
+                  </p>
+                </div>
+
+                {tasks.length > 0 && (
+                  <Link
+                    href="/tasks"
+                    className="shrink-0 text-sm font-medium text-slate-300 hover:text-white"
+                  >
+                    Ver todas
+                  </Link>
+                )}
               </div>
 
               <div className="mt-4">
-                {recentTasks.length > 0 ? (
-                  recentTasks.map((task) => {
+                {upcomingTasks.length > 0 ? (
+                  upcomingTasks.map((task) => {
                     const project =
                       projects.find(
                         (project) =>
@@ -215,9 +256,26 @@ export default async function Home() {
                     );
                   })
                 ) : (
-                  <p className="py-8 text-center text-sm text-slate-500">
-                    Todavía no hay tareas registradas.
-                  </p>
+                  <div className="py-8 text-center">
+                    <h3 className="font-medium text-white">
+                      No hay tareas pendientes
+                    </h3>
+
+                    <p className="mt-2 text-sm text-slate-500">
+                      {tasks.length === 0
+                        ? "Todavía no has creado ninguna tarea."
+                        : "Todas tus tareas actuales están completadas."}
+                    </p>
+
+                    {projects.length > 0 && (
+                      <Link
+                        href="/tasks"
+                        className="mt-5 inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                      >
+                        Crear tarea
+                      </Link>
+                    )}
+                  </div>
                 )}
               </div>
             </section>
