@@ -8,10 +8,14 @@ export default function Header({
   description = "Resumen general de tus proyectos y tareas.",
 }: HeaderProps) {
   return (
-    <header className="border-b border-slate-800 px-8 py-6">
-      <h2 className="text-2xl font-semibold">{title}</h2>
+    <header className="border-b border-slate-800 px-4 py-5 sm:px-6 md:px-8 md:py-6">
+      <h2 className="text-xl font-semibold sm:text-2xl">
+        {title}
+      </h2>
 
-      <p className="mt-1 text-sm text-slate-400">{description}</p>
+      <p className="mt-1 text-sm leading-6 text-slate-400">
+        {description}
+      </p>
     </header>
   );
 }

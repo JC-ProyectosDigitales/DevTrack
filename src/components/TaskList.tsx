@@ -300,7 +300,7 @@ export default function TaskList({
           type="button"
           onClick={startCreate}
           disabled={projects.length === 0}
-          className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
           Nueva tarea
         </button>
@@ -325,7 +325,7 @@ export default function TaskList({
       )}
 
       {isFormOpen && (
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+        <section className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-5">
           <div>
             <h3 className="text-lg font-semibold text-white">
               {editingTaskId !== null
@@ -491,7 +491,7 @@ export default function TaskList({
               </p>
             )}
 
-            <div className="flex justify-end gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
               <button
                 type="button"
                 onClick={resetForm}
@@ -591,9 +591,9 @@ export default function TaskList({
         </div>
       </div>
 
-      <section className="rounded-xl border border-slate-800 bg-slate-900 px-5">
+      <section className="rounded-xl border border-slate-800 bg-slate-900 px-4 sm:px-5">
         {filteredTasks.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 px-6 py-10 text-center">
+                <div className="px-4 py-8 text-center sm:px-6 sm:py-10">
                   <h3 className="text-base font-medium text-white">
                     No hay tareas para mostrar
                   </h3>
@@ -604,7 +604,7 @@ export default function TaskList({
                       : "No hay tareas que coincidan con los filtros seleccionados."}
                   </p>
 
-                  {tasks.length === 0 && (
+                  {tasks.length === 0 && projects.length > 0 && (
                     <button
                       type="button"
                       onClick={startCreate}

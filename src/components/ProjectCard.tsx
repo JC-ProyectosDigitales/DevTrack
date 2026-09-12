@@ -22,28 +22,28 @@ export default function ProjectCard({
   onDelete,
 }: ProjectCardProps) {
   return (
-    <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+    <article className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0">
           {id ? (
             <Link
               href={`/projects/${id}`}
-              className="text-lg font-semibold text-white hover:text-slate-300"
+              className="break-words text-lg font-semibold text-white hover:text-slate-300"
             >
               {name}
             </Link>
           ) : (
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="break-words text-lg font-semibold text-white">
               {name}
             </h3>
           )}
 
-          <p className="mt-1 text-sm leading-6 text-slate-400">
+          <p className="mt-1 break-words text-sm leading-6 text-slate-400">
             {description}
           </p>
         </div>
 
-        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300">
+        <span className="w-fit shrink-0 rounded-full bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300">
           {progress}%
         </span>
       </div>
@@ -58,7 +58,7 @@ export default function ProjectCard({
           />
         </div>
 
-        <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
+        <div className="mt-3 flex flex-col gap-1 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <span>
             {tasksCompleted} de {totalTasks} tareas
           </span>
@@ -68,7 +68,7 @@ export default function ProjectCard({
       </div>
 
       {(onEdit || onDelete) && (
-        <div className="mt-5 flex justify-end gap-2 border-t border-slate-800 pt-4">
+        <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-800 pt-4 sm:flex sm:justify-end">
           {onEdit && (
             <button
               type="button"

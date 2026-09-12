@@ -37,7 +37,6 @@ export default async function Home() {
   ).length;
 
   const today = new Date();
-  
   today.setHours(0, 0, 0, 0);
 
   const overdueTasks = tasks.filter((task) => {
@@ -45,8 +44,7 @@ export default async function Home() {
       return false;
     }
 
-    const dueDate= new Date(task.dueDate);
-
+    const dueDate = new Date(task.dueDate);
     dueDate.setHours(0, 0, 0, 0);
 
     return dueDate < today;
@@ -64,8 +62,8 @@ export default async function Home() {
     .filter((task) => task.status !== "Completada")
     .sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() -
-        new Date(a.createdAt).getTime(),
+        new Date(a.dueDate).getTime() -
+        new Date(b.dueDate).getTime(),
     )
     .slice(0, 4);
 
@@ -77,10 +75,10 @@ export default async function Home() {
           userEmail={user.email}
         />
 
-        <section className="flex-1">
+        <section className="min-w-0 flex-1">
           <Header />
 
-          <div className="space-y-8 p-8">
+          <div className="space-y-6 p-4 pb-24 sm:p-6 sm:pb-24 md:space-y-8 md:p-8 md:pb-8">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 title="Total de proyectos"
@@ -115,7 +113,8 @@ export default async function Home() {
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-400">
-                    Seguimiento de los proyectos en los que estás trabajando.
+                    Seguimiento de los proyectos en los
+                    que estás trabajando.
                   </p>
                 </div>
 
@@ -132,15 +131,18 @@ export default async function Home() {
               {recentProjects.length > 0 ? (
                 <div className="grid gap-4 lg:grid-cols-2">
                   {recentProjects.map((project) => {
-                    const projectTasks = tasks.filter(
-                      (task) =>
-                        task.projectId === project.id,
-                    );
+                    const projectTasks =
+                      tasks.filter(
+                        (task) =>
+                          task.projectId ===
+                          project.id,
+                      );
 
                     const completedProjectTasks =
                       projectTasks.filter(
                         (task) =>
-                          task.status === "Completada",
+                          task.status ===
+                          "Completada",
                       ).length;
 
                     const totalTasks =
@@ -160,7 +162,9 @@ export default async function Home() {
                         key={project.id}
                         id={project.id}
                         name={project.name}
-                        description={project.description}
+                        description={
+                          project.description
+                        }
                         progress={progress}
                         tasksCompleted={
                           completedProjectTasks
@@ -171,17 +175,18 @@ export default async function Home() {
                   })}
                 </div>
               ) : (
-                <div className="rounded-xl border-dashed border-slate-800 p-8 text-center">
+                <div className="rounded-xl border border-dashed border-slate-800 p-6 text-center sm:p-8">
                   <h3 className="font-medium text-white">
-                    Todavía no tienes proyectos.
+                    Todavía no tienes proyectos
                   </h3>
 
                   <p className="mt-2 text-sm text-slate-500">
-                    Crea tu primer proyecto para empezar a organizar tus tareas.
+                    Crea tu primer proyecto para
+                    empezar a organizar tus tareas.
                   </p>
 
                   <Link
-                    href="/projects/new"
+                    href="/projects"
                     className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
                   >
                     Crear proyecto
@@ -190,7 +195,7 @@ export default async function Home() {
               )}
             </section>
 
-            <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+            <section className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-5">
               <div className="mb-2 flex items-end justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold text-white">
@@ -198,7 +203,8 @@ export default async function Home() {
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-400">
-                    Tareas pendientes ordenadas por fecha límite.
+                    Tareas pendientes ordenadas por
+                    fecha límite.
                   </p>
                 </div>
 
@@ -215,12 +221,11 @@ export default async function Home() {
               <div className="mt-4">
                 {upcomingTasks.length > 0 ? (
                   upcomingTasks.map((task) => {
-                    const project =
-                      projects.find(
-                        (project) =>
-                          project.id ===
-                          task.projectId,
-                      );
+                    const project = projects.find(
+                      (project) =>
+                        project.id ===
+                        task.projectId,
+                    );
 
                     return (
                       <TaskItem

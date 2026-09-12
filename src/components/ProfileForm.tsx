@@ -129,7 +129,7 @@ export default function ProfileForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60 sm:ml-auto sm:w-auto"
         >
           {isSubmitting
             ? "Guardando..."

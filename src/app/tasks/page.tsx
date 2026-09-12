@@ -14,38 +14,47 @@ export default async function TasksPage({
   searchParams,
 }: TasksPageProps) {
   const user = await requireUser();
+
   const { projectId } = await searchParams;
 
-  const databaseProjects = await db.orm.public.Project
-    .where({
-      ownerId: user.id,
-    })
-    .all();
+  const databaseProjects =
+    await db.orm.public.Project
+      .where({
+        ownerId: user.id,
+      })
+      .all();
 
   const projectIds = databaseProjects.map(
     (project) => project.id,
   );
 
-  const databaseTasks = await db.orm.public.Task.all();
+  const databaseTasks =
+    await db.orm.public.Task.all();
 
-  const userTasks = databaseTasks.filter((task) =>
-    projectIds.includes(task.projectId),
+  const userTasks = databaseTasks.filter(
+    (task) =>
+      projectIds.includes(task.projectId),
   );
 
-  const projects = databaseProjects.map((project) => ({
-    id: project.id,
-    name: project.name,
-  }));
+  const projects = databaseProjects.map(
+    (project) => ({
+      id: project.id,
+      name: project.name,
+    }),
+  );
 
   const tasks = userTasks.map((task) => {
     const project = databaseProjects.find(
-      (project) => project.id === task.projectId,
+      (project) =>
+        project.id === task.projectId,
     );
 
     return {
       id: task.id,
       title: task.title,
-      project: project?.name ?? "Proyecto no encontrado",
+      project:
+        project?.name ??
+        "Proyecto no encontrado",
       projectId: task.projectId,
       status: task.status as
         | "Pendiente"
@@ -64,7 +73,8 @@ export default async function TasksPage({
   const initialProjectId =
     Number.isInteger(requestedProjectId) &&
     databaseProjects.some(
-      (project) => project.id === requestedProjectId,
+      (project) =>
+        project.id === requestedProjectId,
     )
       ? requestedProjectId
       : null;
@@ -77,17 +87,19 @@ export default async function TasksPage({
           userEmail={user.email}
         />
 
-        <section className="flex-1">
+        <section className="min-w-0 flex-1">
           <Header
             title="Tareas"
             description="Consulta y administra las tareas de tus proyectos."
           />
 
-          <div className="space-y-6 p-8">
+          <div className="space-y-6 p-4 pb-24 sm:p-6 sm:pb-24 md:p-8 md:pb-8">
             <TaskList
               initialTasks={tasks}
               projects={projects}
-              initialProjectId={initialProjectId}
+              initialProjectId={
+                initialProjectId
+              }
             />
           </div>
         </section>

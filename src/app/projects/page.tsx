@@ -7,39 +7,49 @@ import { db } from "@/prisma/db";
 export default async function ProjectsPage() {
   const user = await requireUser();
 
-  const databaseProjects = await db.orm.public.Project
-    .where({
-      ownerId: user.id,
-    })
-    .all();
+  const databaseProjects =
+    await db.orm.public.Project
+      .where({
+        ownerId: user.id,
+      })
+      .all();
 
-  const databaseTasks = await db.orm.public.Task.all();
+  const databaseTasks =
+    await db.orm.public.Task.all();
 
-  const projects = databaseProjects.map((project) => {
-    const projectTasks = databaseTasks.filter(
-      (task) => task.projectId === project.id,
-    );
+  const projects = databaseProjects.map(
+    (project) => {
+      const projectTasks = databaseTasks.filter(
+        (task) =>
+          task.projectId === project.id,
+      );
 
-    const completedTasks = projectTasks.filter(
-      (task) => task.status === "Completada",
-    ).length;
+      const completedTasks =
+        projectTasks.filter(
+          (task) =>
+            task.status === "Completada",
+        ).length;
 
-    const totalTasks = projectTasks.length;
+      const totalTasks = projectTasks.length;
 
-    const progress =
-      totalTasks > 0
-        ? Math.round((completedTasks / totalTasks) * 100)
-        : 0;
+      const progress =
+        totalTasks > 0
+          ? Math.round(
+              (completedTasks / totalTasks) *
+                100,
+            )
+          : 0;
 
-    return {
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      progress,
-      tasksCompleted: completedTasks,
-      totalTasks,
-    };
-  });
+      return {
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        progress,
+        tasksCompleted: completedTasks,
+        totalTasks,
+      };
+    },
+  );
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -49,14 +59,16 @@ export default async function ProjectsPage() {
           userEmail={user.email}
         />
 
-        <section className="flex-1">
+        <section className="min-w-0 flex-1">
           <Header
             title="Proyectos"
             description="Consulta y administra todos tus proyectos."
           />
 
-          <div className="p-8">
-            <ProjectList initialProjects={projects} />
+          <div className="p-4 pb-24 sm:p-6 sm:pb-24 md:p-8 md:pb-8">
+            <ProjectList
+              initialProjects={projects}
+            />
           </div>
         </section>
       </div>
