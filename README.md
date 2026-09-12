@@ -1,36 +1,308 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DevTrack
 
-## Getting Started
+DevTrack es una aplicación full-stack para la gestión de proyectos y tareas, desarrollada como proyecto de portafolio con enfoque en arquitectura, seguridad, validación de datos y buenas prácticas de desarrollo.
 
-First, run the development server:
+La aplicación permite que cada usuario administre sus propios proyectos y tareas dentro de una sesión autenticada, manteniendo aislados los datos entre usuarios.
+
+## Funcionalidades
+
+- Registro e inicio de sesión de usuarios.
+- Autenticación mediante sesiones JWT almacenadas en cookies HTTP-only.
+- Gestión de perfil de usuario.
+- Cambio seguro de contraseña.
+- Creación, edición y eliminación de proyectos.
+- Creación, edición y eliminación de tareas.
+- Estados y prioridades para tareas.
+- Fechas límite para tareas.
+- Dashboard con resumen de proyectos y tareas.
+- Diseño responsive para escritorio y dispositivos móviles.
+- Protección de recursos por propietario.
+- Validación de datos en backend.
+- Pruebas automatizadas de autenticación y API.
+
+## Tecnologías
+
+### Frontend
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+
+### Backend
+
+- Next.js App Router
+- Route Handlers
+- Prisma ORM
+- Prisma Postgres
+
+### Autenticación y seguridad
+
+- JSON Web Tokens con `jose`
+- Cookies HTTP-only
+- Hash de contraseñas con `bcryptjs`
+
+### Calidad y testing
+
+- Vitest
+- ESLint
+- TypeScript
+- Pruebas unitarias y de rutas API
+
+## Arquitectura
+
+DevTrack utiliza el App Router de Next.js y combina frontend y backend dentro de una misma aplicación.
+
+La estructura principal se divide en:
+
+```text
+src/
+├── app/
+│   ├── api/
+│   │   ├── auth/
+│   │   ├── profile/
+│   │   ├── projects/
+│   │   └── tasks/
+│   ├── login/
+│   ├── profile/
+│   ├── projects/
+│   ├── register/
+│   └── tasks/
+├── components/
+├── lib/
+└── prisma/
+```
+
+## Modelo de datos
+
+La aplicación utiliza tres entidades principales:
+
+### User
+
+Representa a los usuarios registrados en DevTrack.
+
+Cada usuario puede tener múltiples proyectos.
+
+### Project
+
+Representa un proyecto perteneciente a un usuario.
+
+Cada proyecto puede contener múltiples tareas.
+
+### Task
+
+Representa una tarea asociada a un proyecto.
+
+Cada tarea contiene información como:
+
+- título;
+- estado;
+- prioridad;
+- fecha límite;
+- proyecto asociado.
+
+## Seguridad
+
+DevTrack implementa aislamiento de datos por usuario.
+
+Las operaciones sobre proyectos validan el `ownerId` del usuario autenticado antes de permitir modificaciones.
+
+Las tareas se validan a través del proyecto al que pertenecen, evitando que un usuario pueda modificar, mover o eliminar tareas pertenecientes a otro usuario.
+
+Las contraseñas nunca se almacenan directamente. Se procesan utilizando `bcryptjs`.
+
+Las sesiones utilizan tokens JWT almacenados en cookies HTTP-only.
+
+## Validación de tareas
+
+Los estados permitidos actualmente son:
+
+```text
+Pendiente
+En progreso
+Completada
+```
+
+Las prioridades permitidas son:
+
+```text
+Alta
+Media
+Baja
+```
+
+También se valida:
+
+- título obligatorio;
+- fecha válida;
+- proyecto válido;
+- identificador de proyecto positivo.
+
+## Pruebas
+
+Actualmente el proyecto cuenta con pruebas para:
+
+- creación y validación de sesiones;
+- registro;
+- inicio de sesión;
+- cierre de sesión;
+- perfil;
+- cambio de contraseña;
+- creación y consulta de proyectos;
+- actualización y eliminación de proyectos;
+- creación y consulta de tareas;
+- actualización y eliminación de tareas;
+- aislamiento de datos entre usuarios;
+- validación de datos de tareas.
+
+Actualmente la suite cuenta con:
+
+```text
+11 archivos de prueba
+65 pruebas automatizadas
+```
+
+Para ejecutar todas las pruebas:
+
+```bash
+npm test
+```
+
+Para ejecutarlas en modo watch:
+
+```bash
+npm run test:watch
+```
+
+## Calidad de código
+
+Ejecutar ESLint:
+
+```bash
+npm run lint
+```
+
+Comprobar TypeScript:
+
+```bash
+npm run typecheck
+```
+
+Generar el build de producción:
+
+```bash
+npm run build
+```
+
+## Instalación
+
+Clona el repositorio:
+
+```bash
+git clone https://github.com/JC-ProyectosDigitales/DevTrack.git
+```
+
+Entra al proyecto:
+
+```bash
+cd DevTrack
+```
+
+Instala las dependencias:
+
+```bash
+npm install
+```
+
+## Variables de entorno
+
+Crea un archivo `.env` en la raíz del proyecto.
+
+Variables principales:
+
+```env
+DATABASE_URL=
+AUTH_SECRET=
+```
+
+Para utilizar el script de usuario inicial también pueden configurarse:
+
+```env
+SEED_USER_NAME=
+SEED_USER_EMAIL=
+SEED_USER_PASSWORD=
+```
+
+El script de seed utiliza estas variables para crear un usuario inicial cuando sea necesario.
+
+## Desarrollo local
+
+Inicia el servidor de desarrollo:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Después abre en el navegador:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts disponibles
 
-## Learn More
+```text
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run typecheck
+npm test
+npm run test:watch
+npm run contract:emit
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Estado del proyecto
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+DevTrack se encuentra en desarrollo activo como proyecto full-stack de portafolio.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Las áreas principales implementadas actualmente son:
 
-## Deploy on Vercel
+- autenticación;
+- administración de usuarios;
+- proyectos;
+- tareas;
+- dashboard;
+- diseño responsive;
+- validación backend;
+- aislamiento de datos por usuario;
+- pruebas automatizadas.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Objetivo del proyecto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+DevTrack fue desarrollado como proyecto de portafolio para aplicar conceptos de desarrollo full-stack en una aplicación real.
+
+El proyecto busca demostrar conocimientos en:
+
+- desarrollo frontend con React y Next.js;
+- creación de APIs con Route Handlers;
+- manejo de bases de datos;
+- autenticación;
+- autorización;
+- seguridad de contraseñas;
+- validación de datos;
+- diseño responsive;
+- pruebas automatizadas;
+- control de versiones con Git y GitHub.
+
+## Autor
+
+**Diego de Jesús Castillo Andrade**
+
+GitHub:
+
+[JC-ProyectosDigitales](https://github.com/JC-ProyectosDigitales)
+
+---
+
+Desarrollado con Next.js, TypeScript, Prisma y PostgreSQL.
