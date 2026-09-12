@@ -14,9 +14,41 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DevTrack",
+  title: {
+    default: "DevTrack",
+    template: "%s | DevTrack",
+  },
   description:
-    "Aplicación full-stack para la gestión de proyectos y tareas.",
+    "Aplicación full-stack para la gestión de proyectos y tareas, con autenticación, control de acceso y seguimiento de actividades.",
+  applicationName: "DevTrack",
+  authors: [
+    {
+      name: "Diego de Jesús Castillo Andrade",
+    },
+  ],
+  creator: "Diego de Jesús Castillo Andrade",
+  keywords: [
+    "DevTrack",
+    "gestión de proyectos",
+    "gestión de tareas",
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Prisma",
+    "PostgreSQL",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: "DevTrack",
+    description:
+      "Aplicación full-stack para la gestión de proyectos y tareas.",
+    type: "website",
+    locale: "es_MX",
+    siteName: "DevTrack",
+  },
 };
 
 type RootLayoutProps = {
