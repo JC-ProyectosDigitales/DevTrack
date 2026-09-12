@@ -1,31 +1,14 @@
-import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import {
+  createSessionToken,
+  verifySessionToken,
+} from "@/lib/session";
 import { db } from "@/prisma/db";
 
-const secret = process.env.AUTH_SECRET;
-
-if (!secret) {
-  throw new Error("AUTH_SECRET no está configurado.");
-}
-
-const encodedSecret = new TextEncoder().encode(secret);
-
-type SessionPayload = {
-  userId: number;
-};
-
 export async function createSession(userId: number) {
-  const token = await new SignJWT({
-    userId,
-  })
-    .setProtectedHeader({
-      alg: "HS256",
-    })
-    .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(encodedSecret);
+  const token = await createSessionToken(userId);
 
   const cookieStore = await cookies();
 
@@ -38,7 +21,7 @@ export async function createSession(userId: number) {
   });
 }
 
-export async function getSession(): Promise<SessionPayload | null> {
+export async function getSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get("devtrack_session")?.value;
 
@@ -46,22 +29,7 @@ export async function getSession(): Promise<SessionPayload | null> {
     return null;
   }
 
-  try {
-    const { payload } = await jwtVerify(
-      token,
-      encodedSecret,
-    );
-
-    if (typeof payload.userId !== "number") {
-      return null;
-    }
-
-    return {
-      userId: payload.userId,
-    };
-  } catch {
-    return null;
-  }
+  return verifySessionToken(token);
 }
 
 export async function requireUser() {
