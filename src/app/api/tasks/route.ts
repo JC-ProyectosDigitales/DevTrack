@@ -1,4 +1,5 @@
 import { getSession } from "@/lib/auth";
+import { validateTaskInput } from "@/lib/task-validation";
 import { db } from "@/prisma/db";
 
 export async function GET() {
@@ -50,35 +51,15 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  const title =
-    typeof body.title === "string"
-      ? body.title.trim()
-      : "";
+  const taskInput = validateTaskInput({
+    title: body.title,
+    status: body.status,
+    priority: body.priority,
+    dueDate: body.dueDate,
+    projectId: body.projectId,
+  });
 
-  const status =
-    typeof body.status === "string"
-      ? body.status
-      : "";
-
-  const priority =
-    typeof body.priority === "string"
-      ? body.priority
-      : "";
-
-  const dueDate =
-    typeof body.dueDate === "string"
-      ? body.dueDate
-      : "";
-
-  const projectId = Number(body.projectId);
-
-  if (
-    !title ||
-    !status ||
-    !priority ||
-    !dueDate ||
-    !Number.isInteger(projectId)
-  ) {
+  if (!taskInput) {
     return Response.json(
       {
         message: "Los datos de la tarea no son válidos.",
@@ -91,7 +72,7 @@ export async function POST(request: Request) {
 
   const project = await db.orm.public.Project
     .where({
-      id: projectId,
+      id: taskInput.projectId,
       ownerId: session.userId,
     })
     .first();
@@ -108,10 +89,10 @@ export async function POST(request: Request) {
   }
 
   const task = await db.orm.public.Task.create({
-    title,
-    status,
-    priority,
-    dueDate,
+    title: taskInput.title,
+    status: taskInput.status,
+    priority: taskInput.priority,
+    dueDate: taskInput.dueDate,
     projectId: project.id,
   });
 
