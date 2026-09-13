@@ -67,7 +67,7 @@ export default async function ProjectDetailPage({
             description={project.description}
           />
 
-          <div className="space-y-6 p-4 pb-24 sm:6 sm:pb-24 lg:space-y-8 lg:p-8">
+          <div className="space-y-6 p-4 pb-24 sm:p-6 sm:pb-24 lg:space-y-8 lg:p-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <Link
                 href="/projects"
