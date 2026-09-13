@@ -61,13 +61,13 @@ export default async function ProjectDetailPage({
           userEmail={user.email}
         />
 
-        <section className="flex-1">
+        <section className="min-w-0 flex-1">
           <Header
             title={project.name}
             description={project.description}
           />
 
-          <div className="space-y-8 p-8">
+          <div className="space-y-6 p-4 pb-24 sm:6 sm:pb-24 lg:space-y-8 lg:p-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <Link
                 href="/projects"
