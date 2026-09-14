@@ -6,9 +6,15 @@ La aplicación permite que cada usuario administre sus propios proyectos y tarea
 
 ## Demo en producción
 
-[https://dev-track-nine-delta.vercel.app](https://dev-track-nine-delta.vercel.app)
+**[Ver DevTrack en producción](https://dev-track-nine-delta.vercel.app)**
 
 La aplicación se encuentra desplegada en Vercel y conectada a una base de datos persistente en Prisma Postgres.
+
+## Vista general
+
+![Dashboard de DevTrack](docs/images/dashboard-dark.png)
+
+El dashboard proporciona un resumen del estado de los proyectos y tareas del usuario, incluyendo proyectos registrados, tareas pendientes, completadas y vencidas, además del progreso de proyectos recientes y próximas actividades.
 
 ## Funcionalidades
 
@@ -21,10 +27,24 @@ La aplicación se encuentra desplegada en Vercel y conectada a una base de datos
 - Estados y prioridades para tareas.
 - Fechas límite para tareas.
 - Dashboard con resumen de proyectos y tareas.
+- Búsqueda y filtrado de tareas por estado y prioridad.
+- Tema claro y oscuro con preferencia persistente.
 - Diseño responsive para escritorio y dispositivos móviles.
 - Protección de recursos por propietario.
 - Validación de datos en backend.
 - Pruebas automatizadas de autenticación y API.
+
+### Gestión de proyectos
+
+![Gestión de proyectos en DevTrack](docs/images/projects-dark.png)
+
+Los proyectos permiten organizar el trabajo, consultar el número de tareas asociadas y visualizar su porcentaje de avance según las tareas completadas.
+
+### Gestión de tareas
+
+![Gestión de tareas en DevTrack](docs/images/tasks-dark.png)
+
+Las tareas pueden consultarse mediante búsqueda y filtros por estado o prioridad. Cada actividad mantiene su proyecto asociado, estado, prioridad y fecha límite.
 
 ## Tecnologías
 
