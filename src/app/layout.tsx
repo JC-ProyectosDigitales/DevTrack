@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dev-track-nine-delta.vercel.app"),
   title: {
     default: "DevTrack",
     template: "%s | DevTrack",
@@ -37,6 +38,9 @@ export const metadata: Metadata = {
     "Prisma",
     "PostgreSQL",
   ],
+  alternates: {
+    canonical: "/",
+  },
   robots: {
     index: true,
     follow: true,
@@ -45,6 +49,7 @@ export const metadata: Metadata = {
     title: "DevTrack",
     description:
       "Aplicación full-stack para la gestión de proyectos y tareas.",
+    url: "/",
     type: "website",
     locale: "es_MX",
     siteName: "DevTrack",

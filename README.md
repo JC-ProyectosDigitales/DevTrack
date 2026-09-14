@@ -4,6 +4,12 @@ DevTrack es una aplicación full-stack para la gestión de proyectos y tareas, d
 
 La aplicación permite que cada usuario administre sus propios proyectos y tareas dentro de una sesión autenticada, manteniendo aislados los datos entre usuarios.
 
+## Demo en producción
+
+[https://dev-track-nine-delta.vercel.app](https://dev-track-nine-delta.vercel.app)
+
+La aplicación se encuentra desplegada en Vercel y conectada a una base de datos persistente en Prisma Postgres.
+
 ## Funcionalidades
 
 - Registro e inicio de sesión de usuarios.
@@ -264,7 +270,9 @@ npm run contract:emit
 
 ## Estado del proyecto
 
-DevTrack se encuentra en desarrollo activo como proyecto full-stack de portafolio.
+DevTrack cuenta actualmente con una versión funcional desplegada en producción.
+
+El proyecto continúa en evolución como aplicación full-stack de portafolio.
 
 Las áreas principales implementadas actualmente son:
 

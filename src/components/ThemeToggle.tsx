@@ -1,57 +1,78 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") {
+const THEME_STORAGE_KEY = "devtrack-theme";
+const THEME_CHANGE_EVENT = "devtrack-theme-change";
+
+function getThemeFromDocument(): Theme {
+  if (typeof document === "undefined") {
     return "dark";
   }
 
-  const savedTheme = window.localStorage.getItem("devtrack-theme");
+  return document.documentElement.dataset.theme === "light"
+    ? "light"
+    : "dark";
+}
 
-  if (savedTheme === "light" || savedTheme === "dark") {
-    return savedTheme;
+function getServerTheme(): Theme {
+  return "dark";
+}
+
+function subscribeToTheme(callback: () => void) {
+  function handleThemeChange() {
+    callback();
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  function handleStorage(event: StorageEvent) {
+    if (event.key !== THEME_STORAGE_KEY) {
+      return;
+    }
+
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+
+    const nextTheme: Theme =
+      savedTheme === "light" || savedTheme === "dark"
+        ? savedTheme
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+
+    document.documentElement.dataset.theme = nextTheme;
+    callback();
+  }
+
+  window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+  window.addEventListener("storage", handleStorage);
+
+  return () => {
+    window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    window.removeEventListener("storage", handleStorage);
+  };
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const initialTheme = getInitialTheme();
-
-    setTheme(initialTheme);
-    document.documentElement.dataset.theme = initialTheme;
-    setMounted(true);
-  }, []);
+  const theme = useSyncExternalStore(
+    subscribeToTheme,
+    getThemeFromDocument,
+    getServerTheme,
+  );
 
   function toggleTheme() {
     const nextTheme: Theme =
       theme === "dark" ? "light" : "dark";
 
-    setTheme(nextTheme);
-
     document.documentElement.dataset.theme = nextTheme;
 
     window.localStorage.setItem(
-      "devtrack-theme",
+      THEME_STORAGE_KEY,
       nextTheme,
     );
-  }
 
-  if (!mounted) {
-    return (
-      <div
-        className="h-10 w-10"
-        aria-hidden="true"
-      />
+    window.dispatchEvent(
+      new Event(THEME_CHANGE_EVENT),
     );
   }
 
