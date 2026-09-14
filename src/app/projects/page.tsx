@@ -52,7 +52,7 @@ export default async function ProjectsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-app text-text-primary">
       <div className="flex min-h-screen">
         <Sidebar
           userName={user.name}

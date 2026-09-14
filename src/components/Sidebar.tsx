@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import {
+  usePathname,
+  useRouter,
+} from "next/navigation";
 import { useState } from "react";
 
 type SidebarProps = {
@@ -31,6 +34,15 @@ const navigationItems = [
     href: "/profile",
   },
 ];
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
 
 export default function Sidebar({
   userName,
@@ -74,11 +86,31 @@ export default function Sidebar({
 
   return (
     <>
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-900 p-6 md:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-border-app bg-surface/90 p-6 backdrop-blur-xl md:flex">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            DevTrack
-          </h1>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3"
+          >
+            <div className="brand-gradient-bg flex h-10 w-10 items-center justify-center rounded-xl shadow-[0_0_24px_var(--accent-soft)]">
+              <span className="text-lg font-bold text-white">
+                D
+              </span>
+            </div>
+
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-text-primary">
+                Dev
+                <span className="brand-gradient">
+                  Track
+                </span>
+              </h1>
+
+              <p className="mt-0.5 text-[10px] uppercase tracking-[0.22em] text-text-muted">
+                Workspace
+              </p>
+            </div>
+          </Link>
 
           <nav className="mt-10 space-y-2">
             {navigationItems.map((item) => {
@@ -89,33 +121,49 @@ export default function Sidebar({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-lg px-4 py-3 text-sm transition ${
+                  className={`group relative block overflow-hidden rounded-xl px-4 py-3 text-sm transition ${
                     isActive
-                      ? "bg-slate-800 font-medium text-white"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      ? "border border-accent/25 bg-[var(--accent-soft)] font-medium text-accent shadow-[0_0_24px_var(--accent-soft)]"
+                      : "border border-transparent text-text-secondary hover:border-border-app hover:bg-surface-elevated hover:text-text-primary"
                   }`}
                 >
-                  {item.label}
+                  {isActive && (
+                    <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-accent" />
+                  )}
+
+                  <span className="relative">
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        <div className="mt-auto border-t border-slate-800 pt-5">
-          <p className="truncate text-sm font-medium text-white">
-            {userName}
-          </p>
+        <div className="mt-auto">
+          <div className="mb-4 rounded-2xl border border-border-app bg-surface-secondary p-4">
+            <div className="flex items-center gap-3">
+              <div className="brand-gradient-bg flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white">
+                {getInitials(userName)}
+              </div>
 
-          <p className="mt-1 truncate text-xs text-slate-500">
-            {userEmail}
-          </p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-text-primary">
+                  {userName}
+                </p>
+
+                <p className="mt-0.5 truncate text-xs text-text-muted">
+                  {userEmail}
+                </p>
+              </div>
+            </div>
+          </div>
 
           <button
             type="button"
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="mt-4 w-full rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-secondary hover:border-danger/30 hover:bg-[var(--danger-soft)] hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoggingOut
               ? "Cerrando sesión..."
@@ -124,8 +172,8 @@ export default function Sidebar({
         </div>
       </aside>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-800 bg-slate-900/95 px-2 py-2 backdrop-blur md:hidden">
-        <div className="grid grid-cols-4 gap-1">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border-app bg-surface/90 px-2 py-2 backdrop-blur-xl md:hidden">
+        <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
           {navigationItems.map((item) => {
             const isActive =
               isItemActive(item.href);
@@ -134,12 +182,16 @@ export default function Sidebar({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-lg px-2 py-3 text-center text-xs transition ${
+                className={`relative rounded-xl px-2 py-3 text-center text-xs transition ${
                   isActive
-                    ? "bg-slate-800 font-medium text-white"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    ? "bg-[var(--accent-soft)] font-medium text-accent"
+                    : "text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
                 }`}
               >
+                {isActive && (
+                  <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-accent" />
+                )}
+
                 {item.mobileLabel}
               </Link>
             );

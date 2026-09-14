@@ -55,14 +55,40 @@ type RootLayoutProps = {
   children: React.ReactNode;
 };
 
+const themeScript = `
+(function () {
+  try {
+    var savedTheme = localStorage.getItem("devtrack-theme");
+    var systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var theme =
+      savedTheme === "light" || savedTheme === "dark"
+        ? savedTheme
+        : systemDark
+          ? "dark"
+          : "light";
+
+    document.documentElement.dataset.theme = theme;
+  } catch (_) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: RootLayoutProps) {
   return (
     <html
       lang="es"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: themeScript,
+          }}
+        />
+      </head>
+
       <body className="min-h-full flex flex-col">
         {children}
       </body>

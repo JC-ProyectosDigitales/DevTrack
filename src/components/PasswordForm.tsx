@@ -1,22 +1,34 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  useState,
+} from "react";
 
 export default function PasswordForm() {
-  const [currentPassword, setCurrentPassword] =
-    useState("");
+  const [
+    currentPassword,
+    setCurrentPassword,
+  ] = useState("");
 
-  const [newPassword, setNewPassword] =
-    useState("");
+  const [
+    newPassword,
+    setNewPassword,
+  ] = useState("");
 
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] = useState(false);
 
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [success, setSuccess] =
+    useState("");
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -31,7 +43,9 @@ export default function PasswordForm() {
       !newPassword ||
       !confirmPassword
     ) {
-      setError("Completa todos los campos.");
+      setError(
+        "Completa todos los campos.",
+      );
       return;
     }
 
@@ -42,7 +56,10 @@ export default function PasswordForm() {
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    if (
+      newPassword !==
+      confirmPassword
+    ) {
       setError(
         "Las nuevas contraseñas no coinciden.",
       );
@@ -52,25 +69,29 @@ export default function PasswordForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        "/api/profile/password",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
+      const response =
+        await fetch(
+          "/api/profile/password",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              currentPassword,
+              newPassword,
+            }),
           },
-          body: JSON.stringify({
-            currentPassword,
-            newPassword,
-          }),
-        },
-      );
+        );
 
-      const body = await response.json();
+      const body =
+        await response.json();
 
       if (!response.ok) {
         setError(
-          typeof body.message === "string"
+          typeof body.message ===
+            "string"
             ? body.message
             : "No se pudo actualizar la contraseña.",
         );
@@ -102,7 +123,7 @@ export default function PasswordForm() {
       <div>
         <label
           htmlFor="current-password"
-          className="mb-2 block text-sm font-medium text-slate-300"
+          className="mb-2 block text-sm font-medium text-text-secondary"
         >
           Contraseña actual
         </label>
@@ -117,14 +138,14 @@ export default function PasswordForm() {
             )
           }
           disabled={isSubmitting}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
+          className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
         />
       </div>
 
       <div>
         <label
           htmlFor="new-password"
-          className="mb-2 block text-sm font-medium text-slate-300"
+          className="mb-2 block text-sm font-medium text-text-secondary"
         >
           Nueva contraseña
         </label>
@@ -139,14 +160,14 @@ export default function PasswordForm() {
             )
           }
           disabled={isSubmitting}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
+          className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
         />
       </div>
 
       <div>
         <label
           htmlFor="confirm-password"
-          className="mb-2 block text-sm font-medium text-slate-300"
+          className="mb-2 block text-sm font-medium text-text-secondary"
         >
           Confirmar nueva contraseña
         </label>
@@ -161,27 +182,27 @@ export default function PasswordForm() {
             )
           }
           disabled={isSubmitting}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
+          className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
         />
       </div>
 
       {error && (
-        <p className="text-sm text-rose-300">
+        <p className="rounded-xl border border-danger/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-danger">
           {error}
         </p>
       )}
 
       {success && (
-        <p className="text-sm text-emerald-300">
+        <p className="rounded-xl border border-success/25 bg-[var(--success-soft)] px-4 py-3 text-sm text-success">
           {success}
         </p>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end border-t border-border-app pt-4">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60 sm:ml-auto sm:w-auto"
+          className="brand-gradient-bg w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-[0_8px_24px_var(--accent-soft)] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:ml-auto sm:w-auto"
         >
           {isSubmitting
             ? "Actualizando..."

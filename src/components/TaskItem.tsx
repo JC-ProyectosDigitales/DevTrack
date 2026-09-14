@@ -12,17 +12,18 @@ type TaskItemProps = {
 };
 
 const statusStyles = {
-  Pendiente: "bg-amber-500/10 text-amber-300",
+  Pendiente:
+    "border border-warning/20 bg-[var(--warning-soft)] text-warning",
   "En progreso":
-    "bg-sky-500/10 text-sky-300",
+    "border border-accent/20 bg-[var(--accent-soft)] text-accent",
   Completada:
-    "bg-emerald-500/10 text-emerald-300",
+    "border border-success/20 bg-[var(--success-soft)] text-success",
 };
 
 const priorityStyles = {
-  Alta: "text-rose-300",
-  Media: "text-amber-300",
-  Baja: "text-slate-300",
+  Alta: "text-danger",
+  Media: "text-warning",
+  Baja: "text-text-secondary",
 };
 
 export default function TaskItem({
@@ -35,13 +36,13 @@ export default function TaskItem({
   onDelete,
 }: TaskItemProps) {
   return (
-    <article className="flex flex-col gap-4 border-b border-slate-800 py-4 last:border-b-0 md:flex-row md:items-center md:justify-between">
+    <article className="group flex flex-col gap-4 border-b border-border-app py-4 last:border-b-0 md:flex-row md:items-center md:justify-between">
       <div className="min-w-0">
-        <h3 className="break-words font-medium text-white">
+        <h3 className="break-words font-medium text-text-primary transition group-hover:text-accent">
           {title}
         </h3>
 
-        <p className="mt-1 break-words text-sm text-slate-500">
+        <p className="mt-1 break-words text-sm text-text-muted">
           {project}
         </p>
       </div>
@@ -54,16 +55,16 @@ export default function TaskItem({
             {status}
           </span>
 
-          <span className="text-slate-400">
+          <span className="text-text-secondary">
             Prioridad:{" "}
             <span
-              className={priorityStyles[priority]}
+              className={`font-medium ${priorityStyles[priority]}`}
             >
               {priority}
             </span>
           </span>
 
-          <span className="text-slate-500">
+          <span className="text-text-muted">
             {dueDate}
           </span>
         </div>
@@ -74,7 +75,7 @@ export default function TaskItem({
               <button
                 type="button"
                 onClick={onEdit}
-                className="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800"
+                className="rounded-xl border border-border-app bg-surface-secondary px-3 py-2 text-xs text-text-secondary hover:border-accent/30 hover:bg-[var(--accent-soft)] hover:text-accent"
               >
                 Editar
               </button>
@@ -84,7 +85,7 @@ export default function TaskItem({
               <button
                 type="button"
                 onClick={onDelete}
-                className="rounded-lg border border-rose-900/70 px-3 py-2 text-xs text-rose-300 hover:bg-rose-950/40"
+                className="rounded-xl border border-danger/25 bg-[var(--danger-soft)] px-3 py-2 text-xs text-danger hover:border-danger/40"
               >
                 Eliminar
               </button>

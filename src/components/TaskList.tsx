@@ -1,6 +1,11 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import {
+  FormEvent,
+  useMemo,
+  useState,
+} from "react";
+
 import TaskItem from "@/components/TaskItem";
 
 type TaskStatus =
@@ -39,38 +44,62 @@ export default function TaskList({
   projects,
   initialProjectId = null,
 }: TaskListProps) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] =
+    useState<Task[]>(initialTasks);
 
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [priority, setPriority] = useState("all");
+  const [status, setStatus] =
+    useState("all");
+  const [priority, setPriority] =
+    useState("all");
 
-  const [isFormOpen, setIsFormOpen] = useState(
-    initialProjectId !== null,
+  const [isFormOpen, setIsFormOpen] =
+    useState(
+      initialProjectId !== null,
     );
-  const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
+
+  const [
+    editingTaskId,
+    setEditingTaskId,
+  ] = useState<number | null>(null);
 
   const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState(
-    initialProjectId !== null
-      ? String(initialProjectId)
-      : "",
-  );
+
+  const [projectId, setProjectId] =
+    useState(
+      initialProjectId !== null
+        ? String(initialProjectId)
+        : "",
+    );
+
   const [newStatus, setNewStatus] =
     useState<TaskStatus>("Pendiente");
-  const [newPriority, setNewPriority] =
-    useState<TaskPriority>("Media");
-  const [dueDate, setDueDate] = useState("");
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [
+    newPriority,
+    setNewPriority,
+  ] = useState<TaskPriority>("Media");
+
+  const [dueDate, setDueDate] =
+    useState("");
+
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] = useState(false);
+
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [success, setSuccess] =
+    useState("");
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
-      const matchesSearch = task.title
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const matchesSearch =
+        task.title
+          .toLowerCase()
+          .includes(
+            search.toLowerCase(),
+          );
 
       const matchesStatus =
         status === "all" ||
@@ -86,14 +115,20 @@ export default function TaskList({
         matchesPriority
       );
     });
-  }, [tasks, search, status, priority]);
+  }, [
+    tasks,
+    search,
+    status,
+    priority,
+  ]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
-    const trimmedTitle = title.trim();
+    const trimmedTitle =
+      title.trim();
 
     if (
       !trimmedTitle ||
@@ -131,13 +166,17 @@ export default function TaskList({
           ? "PATCH"
           : "POST";
 
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response =
+        await fetch(endpoint, {
+          method,
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify(
+            payload,
+          ),
+        });
 
       if (!response.ok) {
         throw new Error(
@@ -147,12 +186,15 @@ export default function TaskList({
         );
       }
 
-      const savedTask = await response.json();
+      const savedTask =
+        await response.json();
 
-      const selectedProject = projects.find(
-        (project) =>
-          project.id === Number(projectId),
-      );
+      const selectedProject =
+        projects.find(
+          (project) =>
+            project.id ===
+            Number(projectId),
+        );
 
       if (!selectedProject) {
         throw new Error(
@@ -163,30 +205,46 @@ export default function TaskList({
       const formattedTask: Task = {
         id: savedTask.id,
         title: savedTask.title,
-        project: selectedProject.name,
-        projectId: savedTask.projectId,
-        status: savedTask.status,
-        priority: savedTask.priority,
-        dueDate: savedTask.dueDate,
+        project:
+          selectedProject.name,
+        projectId:
+          savedTask.projectId,
+        status:
+          savedTask.status,
+        priority:
+          savedTask.priority,
+        dueDate:
+          savedTask.dueDate,
       };
 
-      if (editingTaskId !== null) {
-        setTasks((currentTasks) =>
-          currentTasks.map((task) =>
-            task.id === editingTaskId
-              ? formattedTask
-              : task,
-          ),
+      if (
+        editingTaskId !== null
+      ) {
+        setTasks(
+          (currentTasks) =>
+            currentTasks.map(
+              (task) =>
+                task.id ===
+                editingTaskId
+                  ? formattedTask
+                  : task,
+            ),
         );
 
-        setSuccess("Tarea actualizada correctamente.");
+        setSuccess(
+          "Tarea actualizada correctamente.",
+        );
       } else {
-        setTasks((currentTasks) => [
-          ...currentTasks,
-          formattedTask,
-        ]);
-        
-        setSuccess("Tarea creada correctamente.");
+        setTasks(
+          (currentTasks) => [
+            ...currentTasks,
+            formattedTask,
+          ],
+        );
+
+        setSuccess(
+          "Tarea creada correctamente.",
+        );
       }
 
       resetForm();
@@ -211,31 +269,49 @@ export default function TaskList({
     setSuccess("");
   }
 
-  function startEdit(task: Task) {
+  function startEdit(
+    task: Task,
+  ) {
     setEditingTaskId(task.id);
     setTitle(task.title);
-    setProjectId(String(task.projectId));
+
+    setProjectId(
+      String(task.projectId),
+    );
+
     setNewStatus(task.status);
-    setNewPriority(task.priority);
+
+    setNewPriority(
+      task.priority,
+    );
+
     setSuccess("");
 
-    const date = new Date(task.dueDate);
-    const localDate = new Date(
-      date.getTime() -
-        date.getTimezoneOffset() * 60000,
-    )
-      .toISOString()
-      .split("T")[0];
+    const date = new Date(
+      task.dueDate,
+    );
+
+    const localDate =
+      new Date(
+        date.getTime() -
+          date.getTimezoneOffset() *
+            60000,
+      )
+        .toISOString()
+        .split("T")[0];
 
     setDueDate(localDate);
     setError("");
     setIsFormOpen(true);
   }
 
-  async function handleDelete(task: Task) {
-    const confirmed = window.confirm(
-      `¿Quieres eliminar la tarea "${task.title}"?`,
-    );
+  async function handleDelete(
+    task: Task,
+  ) {
+    const confirmed =
+      window.confirm(
+        `¿Quieres eliminar la tarea "${task.title}"?`,
+      );
 
     if (!confirmed) {
       return;
@@ -245,12 +321,13 @@ export default function TaskList({
     setSuccess("");
 
     try {
-      const response = await fetch(
-        `/api/tasks/${task.id}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response =
+        await fetch(
+          `/api/tasks/${task.id}`,
+          {
+            method: "DELETE",
+          },
+        );
 
       if (!response.ok) {
         throw new Error(
@@ -258,13 +335,18 @@ export default function TaskList({
         );
       }
 
-      setTasks((currentTasks) =>
-        currentTasks.filter(
-          (currentTask) =>
-            currentTask.id !== task.id,
-        ),
+      setTasks(
+        (currentTasks) =>
+          currentTasks.filter(
+            (currentTask) =>
+              currentTask.id !==
+              task.id,
+          ),
       );
-      setSuccess("Tarea eliminada correctamente.");
+
+      setSuccess(
+        "Tarea eliminada correctamente.",
+      );
     } catch {
       setError(
         "Ocurrió un problema al eliminar la tarea.",
@@ -287,67 +369,116 @@ export default function TaskList({
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-text-muted">
+              Actividad
+            </span>
+          </div>
+
+          <h2 className="text-xl font-semibold tracking-tight text-text-primary">
             Todas las tareas
           </h2>
 
-          <p className="mt-1 text-sm text-slate-400">
-            Revisa el estado, prioridad y fecha límite de cada actividad.
+          <p className="mt-1 text-sm leading-6 text-text-secondary">
+            Revisa el estado,
+            prioridad y fecha límite de
+            cada actividad.
           </p>
         </div>
 
         <button
           type="button"
           onClick={startCreate}
-          disabled={projects.length === 0}
-          className="w-full rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+          disabled={
+            projects.length === 0
+          }
+          className="brand-gradient-bg w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-[0_8px_24px_var(--accent-soft)] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 sm:w-auto"
         >
           Nueva tarea
         </button>
       </div>
 
-      {error && !isFormOpen && (
-        <p className="rounded-lg border border-rose-900/60 bg-rose-950/20 px-4 py-3 text-sm text-rose-300">
-          {error}
-        </p>
-      )}
+      {error &&
+        !isFormOpen && (
+          <p className="rounded-xl border border-danger/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-danger">
+            {error}
+          </p>
+        )}
 
-      {success && !isFormOpen && (
-        <p className="rounded-lg border border-emerald-900/60 bg-emerald-950/20 px-4 py-3 text-sm text-emerald-300">
-          {success}
-        </p>
-      )}
+      {success &&
+        !isFormOpen && (
+          <p className="rounded-xl border border-success/25 bg-[var(--success-soft)] px-4 py-3 text-sm text-success">
+            {success}
+          </p>
+        )}
 
       {projects.length === 0 && (
-        <div className="rounded-xl border border-dashed border-slate-800 p-6 text-sm text-slate-400">
-          Primero debes crear un proyecto antes de agregar tareas.
+        <div className="rounded-2xl border border-dashed border-border-strong bg-surface/60 p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--warning-soft)] text-warning">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+                <path d="M10.3 4.3 2.8 17.2A2 2 0 0 0 4.5 20h15a2 2 0 0 0 1.7-2.8L13.7 4.3a2 2 0 0 0-3.4 0Z" />
+              </svg>
+            </div>
+
+            <div>
+              <p className="font-medium text-text-primary">
+                Primero crea un proyecto
+              </p>
+
+              <p className="mt-1 text-sm leading-6 text-text-secondary">
+                Necesitas al menos un
+                proyecto antes de poder
+                agregar tareas.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {isFormOpen && (
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-5">
-          <div>
-            <h3 className="text-lg font-semibold text-white">
-              {editingTaskId !== null
-                ? "Editar tarea"
-                : "Crear tarea"}
-            </h3>
+        <section className="overflow-hidden rounded-2xl border border-border-app bg-surface shadow-sm">
+          <div className="border-b border-border-app p-4 sm:p-5">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-accent-secondary shadow-[0_0_10px_var(--accent-secondary)]" />
 
-            <p className="mt-1 text-sm text-slate-400">
-              {editingTaskId !== null
+              <h3 className="text-lg font-semibold text-text-primary">
+                {editingTaskId !==
+                null
+                  ? "Editar tarea"
+                  : "Crear tarea"}
+              </h3>
+            </div>
+
+            <p className="mt-2 text-sm text-text-secondary">
+              {editingTaskId !==
+              null
                 ? "Actualiza la información de la tarea."
                 : "Agrega la información de la nueva tarea."}
             </p>
           </div>
 
           <form
-            onSubmit={handleSubmit}
-            className="mt-5 space-y-4"
+            onSubmit={
+              handleSubmit
+            }
+            className="space-y-5 p-4 sm:p-5"
           >
             <div>
               <label
                 htmlFor="task-title"
-                className="mb-2 block text-sm font-medium text-slate-300"
+                className="mb-2 block text-sm font-medium text-text-secondary"
               >
                 Título
               </label>
@@ -356,19 +487,26 @@ export default function TaskList({
                 id="task-title"
                 type="text"
                 value={title}
-                onChange={(event) =>
-                  setTitle(event.target.value)
+                onChange={(
+                  event,
+                ) =>
+                  setTitle(
+                    event.target
+                      .value,
+                  )
                 }
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting
+                }
                 placeholder="Ej. Diseñar página de acceso"
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500 disabled:opacity-60"
+                className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
               />
             </div>
 
             <div>
               <label
                 htmlFor="task-project"
-                className="mb-2 block text-sm font-medium text-slate-300"
+                className="mb-2 block text-sm font-medium text-text-secondary"
               >
                 Proyecto
               </label>
@@ -376,24 +514,40 @@ export default function TaskList({
               <select
                 id="task-project"
                 value={projectId}
-                onChange={(event) =>
-                  setProjectId(event.target.value)
+                onChange={(
+                  event,
+                ) =>
+                  setProjectId(
+                    event.target
+                      .value,
+                  )
                 }
-                disabled={isSubmitting}
-                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
+                disabled={
+                  isSubmitting
+                }
+                className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
               >
                 <option value="">
-                  Selecciona un proyecto
+                  Selecciona un
+                  proyecto
                 </option>
 
-                {projects.map((project) => (
-                  <option
-                    key={project.id}
-                    value={project.id}
-                  >
-                    {project.name}
-                  </option>
-                ))}
+                {projects.map(
+                  (project) => (
+                    <option
+                      key={
+                        project.id
+                      }
+                      value={
+                        project.id
+                      }
+                    >
+                      {
+                        project.name
+                      }
+                    </option>
+                  ),
+                )}
               </select>
             </div>
 
@@ -401,21 +555,28 @@ export default function TaskList({
               <div>
                 <label
                   htmlFor="new-status"
-                  className="mb-2 block text-sm font-medium text-slate-300"
+                  className="mb-2 block text-sm font-medium text-text-secondary"
                 >
                   Estado
                 </label>
 
                 <select
                   id="new-status"
-                  value={newStatus}
-                  onChange={(event) =>
+                  value={
+                    newStatus
+                  }
+                  onChange={(
+                    event,
+                  ) =>
                     setNewStatus(
-                      event.target.value as TaskStatus,
+                      event.target
+                        .value as TaskStatus,
                     )
                   }
-                  disabled={isSubmitting}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
+                  disabled={
+                    isSubmitting
+                  }
+                  className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
                 >
                   <option value="Pendiente">
                     Pendiente
@@ -434,21 +595,28 @@ export default function TaskList({
               <div>
                 <label
                   htmlFor="new-priority"
-                  className="mb-2 block text-sm font-medium text-slate-300"
+                  className="mb-2 block text-sm font-medium text-text-secondary"
                 >
                   Prioridad
                 </label>
 
                 <select
                   id="new-priority"
-                  value={newPriority}
-                  onChange={(event) =>
+                  value={
+                    newPriority
+                  }
+                  onChange={(
+                    event,
+                  ) =>
                     setNewPriority(
-                      event.target.value as TaskPriority,
+                      event.target
+                        .value as TaskPriority,
                     )
                   }
-                  disabled={isSubmitting}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
+                  disabled={
+                    isSubmitting
+                  }
+                  className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
                 >
                   <option value="Alta">
                     Alta
@@ -467,7 +635,7 @@ export default function TaskList({
               <div>
                 <label
                   htmlFor="task-due-date"
-                  className="mb-2 block text-sm font-medium text-slate-300"
+                  className="mb-2 block text-sm font-medium text-text-secondary"
                 >
                   Fecha límite
                 </label>
@@ -476,39 +644,53 @@ export default function TaskList({
                   id="task-due-date"
                   type="date"
                   value={dueDate}
-                  onChange={(event) =>
-                    setDueDate(event.target.value)
+                  onChange={(
+                    event,
+                  ) =>
+                    setDueDate(
+                      event.target
+                        .value,
+                    )
                   }
-                  disabled={isSubmitting}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500 disabled:opacity-60"
+                  disabled={
+                    isSubmitting
+                  }
+                  className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
                 />
               </div>
             </div>
 
             {error && (
-              <p className="text-sm text-rose-300">
+              <p className="text-sm text-danger">
                 {error}
               </p>
             )}
 
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <div className="grid grid-cols-2 gap-3 border-t border-border-app pt-4 sm:flex sm:justify-end">
               <button
                 type="button"
-                onClick={resetForm}
-                disabled={isSubmitting}
-                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 disabled:opacity-60"
+                onClick={
+                  resetForm
+                }
+                disabled={
+                  isSubmitting
+                }
+                className="rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm font-medium text-text-secondary hover:border-border-strong hover:text-text-primary disabled:opacity-60"
               >
                 Cancelar
               </button>
 
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={
+                  isSubmitting
+                }
+                className="brand-gradient-bg rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-[0_8px_24px_var(--accent-soft)] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {isSubmitting
                   ? "Guardando..."
-                  : editingTaskId !== null
+                  : editingTaskId !==
+                      null
                     ? "Guardar cambios"
                     : "Crear tarea"}
               </button>
@@ -517,116 +699,204 @@ export default function TaskList({
         </section>
       )}
 
-      <div className="flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4 md:flex-row md:items-end">
-        <div className="flex-1">
-          <label
-            htmlFor="search"
-            className="mb-2 block text-sm font-medium text-slate-300"
-          >
-            Buscar
-          </label>
+      <section className="rounded-2xl border border-border-app bg-surface p-4 shadow-sm">
+        <div className="mb-4">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-secondary" />
 
-          <input
-            id="search"
-            type="text"
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-            placeholder="Buscar por nombre de tarea..."
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-600 focus:border-slate-500"
-          />
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-text-muted">
+              Filtros
+            </span>
+          </div>
+
+          <p className="mt-2 text-sm text-text-secondary">
+            Encuentra rápidamente
+            tareas por nombre, estado
+            o prioridad.
+          </p>
         </div>
 
-        <div className="md:w-48">
-          <label
-            htmlFor="status"
-            className="mb-2 block text-sm font-medium text-slate-300"
-          >
-            Estado
-          </label>
+        <div className="flex flex-col gap-4 md:flex-row md:items-end">
+          <div className="flex-1">
+            <label
+              htmlFor="search"
+              className="mb-2 block text-sm font-medium text-text-secondary"
+            >
+              Buscar
+            </label>
 
-          <select
-            id="status"
-            value={status}
-            onChange={(event) =>
-              setStatus(event.target.value)
-            }
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500"
-          >
-            <option value="all">Todos</option>
-            <option value="Pendiente">
-              Pendiente
-            </option>
-            <option value="En progreso">
-              En progreso
-            </option>
-            <option value="Completada">
-              Completada
-            </option>
-          </select>
+            <input
+              id="search"
+              type="text"
+              value={search}
+              onChange={(
+                event,
+              ) =>
+                setSearch(
+                  event.target.value,
+                )
+              }
+              placeholder="Buscar por nombre de tarea..."
+              className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)]"
+            />
+          </div>
+
+          <div className="md:w-48">
+            <label
+              htmlFor="status"
+              className="mb-2 block text-sm font-medium text-text-secondary"
+            >
+              Estado
+            </label>
+
+            <select
+              id="status"
+              value={status}
+              onChange={(
+                event,
+              ) =>
+                setStatus(
+                  event.target.value,
+                )
+              }
+              className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)]"
+            >
+              <option value="all">
+                Todos
+              </option>
+
+              <option value="Pendiente">
+                Pendiente
+              </option>
+
+              <option value="En progreso">
+                En progreso
+              </option>
+
+              <option value="Completada">
+                Completada
+              </option>
+            </select>
+          </div>
+
+          <div className="md:w-48">
+            <label
+              htmlFor="priority"
+              className="mb-2 block text-sm font-medium text-text-secondary"
+            >
+              Prioridad
+            </label>
+
+            <select
+              id="priority"
+              value={priority}
+              onChange={(
+                event,
+              ) =>
+                setPriority(
+                  event.target.value,
+                )
+              }
+              className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)]"
+            >
+              <option value="all">
+                Todas
+              </option>
+
+              <option value="Alta">
+                Alta
+              </option>
+
+              <option value="Media">
+                Media
+              </option>
+
+              <option value="Baja">
+                Baja
+              </option>
+            </select>
+          </div>
         </div>
+      </section>
 
-        <div className="md:w-48">
-          <label
-            htmlFor="priority"
-            className="mb-2 block text-sm font-medium text-slate-300"
-          >
-            Prioridad
-          </label>
+      <section className="overflow-hidden rounded-2xl border border-border-app bg-surface px-4 shadow-sm sm:px-5">
+        {filteredTasks.length ===
+        0 ? (
+          <div className="px-4 py-10 text-center sm:px-6 sm:py-12">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-accent">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                className="h-6 w-6"
+                aria-hidden="true"
+              >
+                <path d="M9 11 11 13 15 9" />
+                <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+              </svg>
+            </div>
 
-          <select
-            id="priority"
-            value={priority}
-            onChange={(event) =>
-              setPriority(event.target.value)
-            }
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white outline-none focus:border-slate-500"
-          >
-            <option value="all">Todas</option>
-            <option value="Alta">Alta</option>
-            <option value="Media">Media</option>
-            <option value="Baja">Baja</option>
-          </select>
-        </div>
-      </div>
+            <h3 className="mt-4 text-base font-medium text-text-primary">
+              No hay tareas para
+              mostrar
+            </h3>
 
-      <section className="rounded-xl border border-slate-800 bg-slate-900 px-4 sm:px-5">
-        {filteredTasks.length === 0 ? (
-                <div className="px-4 py-8 text-center sm:px-6 sm:py-10">
-                  <h3 className="text-base font-medium text-white">
-                    No hay tareas para mostrar
-                  </h3>
+            <p className="mt-2 text-sm leading-6 text-text-muted">
+              {tasks.length === 0
+                ? "Todavía no has creado ninguna tarea."
+                : "No hay tareas que coincidan con los filtros seleccionados."}
+            </p>
 
-                  <p className="mt-2 text-sm text-slate-400">
-                    {tasks.length === 0
-                      ? "Todavía no has creado ninguna tarea."
-                      : "No hay tareas que coincidan con los filtros seleccionados."}
-                  </p>
-
-                  {tasks.length === 0 && projects.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={startCreate}
-                      className="mt-5 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
-                    >
-                        Crear primera tarea
-                    </button>
-                  )}
-                </div>
-              ) : (
-                filteredTasks.map((task) => (
-                <TaskItem
-                  key={task.id}
-                  title={task.title}
-                  project={task.project}
-                  status={task.status}
-                  priority={task.priority}
-                  dueDate={new Date(task.dueDate).toLocaleDateString("es-MX")}
-                  onEdit={() => startEdit(task)}
-                  onDelete={() => handleDelete(task)}
-                />
-              ))
+            {tasks.length === 0 &&
+              projects.length >
+                0 && (
+                <button
+                  type="button"
+                  onClick={
+                    startCreate
+                  }
+                  className="brand-gradient-bg mt-5 rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-[0_8px_24px_var(--accent-soft)] hover:-translate-y-0.5"
+                >
+                  Crear primera tarea
+                </button>
+              )}
+          </div>
+        ) : (
+          filteredTasks.map(
+            (task) => (
+              <TaskItem
+                key={task.id}
+                title={
+                  task.title
+                }
+                project={
+                  task.project
+                }
+                status={
+                  task.status
+                }
+                priority={
+                  task.priority
+                }
+                dueDate={new Date(
+                  task.dueDate,
+                ).toLocaleDateString(
+                  "es-MX",
+                )}
+                onEdit={() =>
+                  startEdit(
+                    task,
+                  )
+                }
+                onDelete={() =>
+                  handleDelete(
+                    task,
+                  )
+                }
+              />
+            ),
+          )
         )}
       </section>
     </>

@@ -68,7 +68,8 @@ export default async function TasksPage({
     };
   });
 
-  const requestedProjectId = Number(projectId);
+  const requestedProjectId =
+    Number(projectId);
 
   const initialProjectId =
     Number.isInteger(requestedProjectId) &&
@@ -80,7 +81,7 @@ export default async function TasksPage({
       : null;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-app text-text-primary">
       <div className="flex min-h-screen">
         <Sidebar
           userName={user.name}

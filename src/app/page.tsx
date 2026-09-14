@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import Header from "@/components/Header";
 import ProjectCard from "@/components/ProjectCard";
 import Sidebar from "@/components/Sidebar";
@@ -5,7 +7,6 @@ import StatCard from "@/components/StatCard";
 import TaskItem from "@/components/TaskItem";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
-import Link from "next/link";
 
 export default async function Home() {
   const user = await requireUser();
@@ -68,7 +69,7 @@ export default async function Home() {
     .slice(0, 4);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
+    <main className="min-h-screen bg-app text-text-primary">
       <div className="flex min-h-screen">
         <Sidebar
           userName={user.name}
@@ -108,11 +109,19 @@ export default async function Home() {
             <section>
               <div className="mb-4 flex items-end justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-white">
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+
+                    <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-text-muted">
+                      Actividad reciente
+                    </span>
+                  </div>
+
+                  <h2 className="text-xl font-semibold tracking-tight text-text-primary">
                     Proyectos recientes
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm leading-6 text-text-secondary">
                     Seguimiento de los proyectos en los
                     que estás trabajando.
                   </p>
@@ -121,7 +130,7 @@ export default async function Home() {
                 {projects.length > 0 && (
                   <Link
                     href="/projects"
-                    className="shrink-0 text-sm font-medium text-slate-300 hover:text-white"
+                    className="shrink-0 text-sm font-medium text-accent hover:text-accent-hover"
                   >
                     Ver todos
                   </Link>
@@ -175,19 +184,32 @@ export default async function Home() {
                   })}
                 </div>
               ) : (
-                <div className="rounded-xl border border-dashed border-slate-800 p-6 text-center sm:p-8">
-                  <h3 className="font-medium text-white">
+                <div className="rounded-2xl border border-dashed border-border-strong bg-surface/60 p-6 text-center sm:p-8">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-accent">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      className="h-6 w-6"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h4L11 6h7.5A1.5 1.5 0 0 1 20 7.5v10A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-12Z" />
+                    </svg>
+                  </div>
+
+                  <h3 className="mt-4 font-medium text-text-primary">
                     Todavía no tienes proyectos
                   </h3>
 
-                  <p className="mt-2 text-sm text-slate-500">
+                  <p className="mt-2 text-sm text-text-muted">
                     Crea tu primer proyecto para
                     empezar a organizar tus tareas.
                   </p>
 
                   <Link
                     href="/projects"
-                    className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
+                    className="brand-gradient-bg mt-5 inline-flex rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-[0_8px_24px_var(--accent-soft)] hover:-translate-y-0.5"
                   >
                     Crear proyecto
                   </Link>
@@ -195,30 +217,40 @@ export default async function Home() {
               )}
             </section>
 
-            <section className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-5">
-              <div className="mb-2 flex items-end justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-white">
-                    Próximas tareas
-                  </h2>
+            <section className="overflow-hidden rounded-2xl border border-border-app bg-surface shadow-sm">
+              <div className="border-b border-border-app p-4 sm:p-5">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-accent-secondary" />
 
-                  <p className="mt-1 text-sm text-slate-400">
-                    Tareas pendientes ordenadas por
-                    fecha límite.
-                  </p>
+                      <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-text-muted">
+                        Seguimiento
+                      </span>
+                    </div>
+
+                    <h2 className="text-xl font-semibold tracking-tight text-text-primary">
+                      Próximas tareas
+                    </h2>
+
+                    <p className="mt-1 text-sm leading-6 text-text-secondary">
+                      Tareas pendientes ordenadas por
+                      fecha límite.
+                    </p>
+                  </div>
+
+                  {tasks.length > 0 && (
+                    <Link
+                      href="/tasks"
+                      className="shrink-0 text-sm font-medium text-accent hover:text-accent-hover"
+                    >
+                      Ver todas
+                    </Link>
+                  )}
                 </div>
-
-                {tasks.length > 0 && (
-                  <Link
-                    href="/tasks"
-                    className="shrink-0 text-sm font-medium text-slate-300 hover:text-white"
-                  >
-                    Ver todas
-                  </Link>
-                )}
               </div>
 
-              <div className="mt-4">
+              <div className="px-4 sm:px-5">
                 {upcomingTasks.length > 0 ? (
                   upcomingTasks.map((task) => {
                     const project = projects.find(
@@ -261,12 +293,25 @@ export default async function Home() {
                     );
                   })
                 ) : (
-                  <div className="py-8 text-center">
-                    <h3 className="font-medium text-white">
+                  <div className="py-10 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--success-soft)] text-success">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        className="h-6 w-6"
+                        aria-hidden="true"
+                      >
+                        <path d="m5 12 4 4L19 6" />
+                      </svg>
+                    </div>
+
+                    <h3 className="mt-4 font-medium text-text-primary">
                       No hay tareas pendientes
                     </h3>
 
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p className="mt-2 text-sm text-text-muted">
                       {tasks.length === 0
                         ? "Todavía no has creado ninguna tarea."
                         : "Todas tus tareas actuales están completadas."}
@@ -275,7 +320,7 @@ export default async function Home() {
                     {projects.length > 0 && (
                       <Link
                         href="/tasks"
-                        className="mt-5 inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                        className="mt-5 inline-flex rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm font-medium text-text-secondary hover:border-accent/30 hover:bg-[var(--accent-soft)] hover:text-accent"
                       >
                         Crear tarea
                       </Link>
