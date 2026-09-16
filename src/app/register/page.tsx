@@ -227,6 +227,7 @@ export default function RegisterPage() {
                   disabled={isSubmitting}
                   autoComplete="name"
                   placeholder="Tu nombre"
+                  required
                   className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
                 />
               </div>
@@ -251,6 +252,7 @@ export default function RegisterPage() {
                   disabled={isSubmitting}
                   autoComplete="email"
                   placeholder="tu@correo.com"
+                  required
                   className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
                 />
               </div>
@@ -274,6 +276,7 @@ export default function RegisterPage() {
                   }
                   disabled={isSubmitting}
                   autoComplete="new-password"
+                  required
                   className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-3 text-sm text-text-primary outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
                 />
 
@@ -283,7 +286,11 @@ export default function RegisterPage() {
               </div>
 
               {error && (
-                <p className="rounded-xl border border-danger/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-danger">
+                <p
+                  role="alert"
+                  aria-live="polite"
+                  className="rounded-xl border border-danger/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-danger"
+                >
                   {error}
                 </p>
               )}

@@ -271,13 +271,21 @@ export default function ProjectList({
       </div>
 
       {error && !isFormOpen && (
-        <p className="rounded-xl border border-danger/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-danger">
+        <p
+          role="alert"
+          aria-live="polite"
+          className="rounded-xl border border-danger/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-danger"
+        >
           {error}
         </p>
       )}
 
       {success && !isFormOpen && (
-        <p className="rounded-xl border border-success/25 bg-[var(--success-soft)] px-4 py-3 text-sm text-success">
+        <p
+          role="status"
+          aria-live="polite"
+          className="rounded-xl border border-success/25 bg-[var(--success-soft)] px-4 py-3 text-sm text-success"
+        >
           {success}
         </p>
       )}
@@ -325,6 +333,7 @@ export default function ProjectList({
                 }
                 placeholder="Ej. Portal de proveedores"
                 disabled={isSubmitting}
+                required
                 className="w-full rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
               />
             </div>
@@ -348,12 +357,17 @@ export default function ProjectList({
                 placeholder="Describe brevemente el objetivo del proyecto."
                 rows={4}
                 disabled={isSubmitting}
+                required
                 className="w-full resize-none rounded-xl border border-border-app bg-surface-secondary px-4 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)] disabled:opacity-60"
               />
             </div>
 
             {error && (
-              <p className="text-sm text-danger">
+              <p
+                role="alert"
+                aria-live="polite"
+                className="text-sm text-danger"
+              >
                 {error}
               </p>
             )}
