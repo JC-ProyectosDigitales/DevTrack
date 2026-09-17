@@ -179,10 +179,14 @@ export default function TaskList({
         });
 
       if (!response.ok) {
+        const data = await response.json().catch(() => null);
+
         throw new Error(
-          editingTaskId !== null
-            ? "No se pudo actualizar la tarea."
-            : "No se pudo crear la tarea.",
+          typeof data?.message === "string"
+            ? data.message
+            : editingTaskId !== null
+              ? "No se pudo actualizar la tarea."
+              : "No se pudo crear la tarea.",
         );
       }
 
@@ -248,9 +252,11 @@ export default function TaskList({
       }
 
       resetForm();
-    } catch {
+    } catch (error) {
       setError(
-        "Ocurrió un problema al guardar la tarea.",
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un problema al guardar la tarea.",
       );
     } finally {
       setIsSubmitting(false);
@@ -330,8 +336,12 @@ export default function TaskList({
         );
 
       if (!response.ok) {
+        const data = await response.json().catch(() => null);
+
         throw new Error(
-          "No se pudo eliminar la tarea.",
+          typeof data?.message === "string"
+            ? data.message
+            : "No se pudo eliminar la tarea.",
         );
       }
 
@@ -347,9 +357,11 @@ export default function TaskList({
       setSuccess(
         "Tarea eliminada correctamente.",
       );
-    } catch {
+    } catch (error) {
       setError(
-        "Ocurrió un problema al eliminar la tarea.",
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un problema al eliminar la tarea.",
       );
     }
   }

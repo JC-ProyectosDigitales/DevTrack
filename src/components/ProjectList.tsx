@@ -81,8 +81,12 @@ export default function ProjectList({
         );
 
         if (!response.ok) {
+          const data = await response.json().catch(() => null);
+
           throw new Error(
-            "No se pudo actualizar el proyecto.",
+            typeof data?.message === "string"
+              ? data.message
+              : "No se pudo actualizar el proyecto.",
           );
         }
 
@@ -124,8 +128,12 @@ export default function ProjectList({
         );
 
         if (!response.ok) {
+          const data = await response.json().catch(() => null);
+
           throw new Error(
-            "No se pudo crear el proyecto.",
+            typeof data?.message === "string"
+              ? data.message
+              : "No se pudo crear el proyecto.",
           );
         }
 
@@ -153,9 +161,11 @@ export default function ProjectList({
       }
 
       resetForm();
-    } catch {
+    } catch (error) {
       setError(
-        "Ocurrió un problema al guardar el proyecto.",
+        error instanceof Error
+          ? error.message
+          : "Ocurrió un problema al guardar el proyecto.",
       );
     } finally {
       setIsSubmitting(false);
@@ -203,11 +213,11 @@ export default function ProjectList({
       );
 
       if (!response.ok) {
-        const body = await response.json();
+        const data = await response.json().catch(() => null);
 
         setError(
-          typeof body.message === "string"
-            ? body.message
+          typeof data?.message === "string"
+            ? data.message
             : "No se pudo eliminar el proyecto.",
         );
 
