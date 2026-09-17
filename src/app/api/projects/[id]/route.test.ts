@@ -95,6 +95,50 @@ describe("PATCH /api/projects/[id]", () => {
     });
   });
 
+  it("returns 400 when PATCH receives invalid JSON", async () => {
+    getSessionMock.mockResolvedValue({
+      userId: 7,
+    });
+
+    projectFirstMock.mockResolvedValue({
+      id: 10,
+      name: "DevTrack",
+      description: "Proyecto personal",
+      ownerId: 7,
+    });
+
+    const request = new Request(
+      "http://localhost/api/projects/10",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: "{invalid-json",
+      },
+    );
+
+    const response = await PATCH(
+      request,
+      createContext("10"),
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      message: "Solicitud no válida.",
+    });
+
+    expect(projectWhereMock).toHaveBeenCalledWith({
+      id: 10,
+      ownerId: 7,
+    });
+
+    expect(projectUpdateMock).not.toHaveBeenCalled();
+  });
+
   it("returns 401 when there is no session", async () => {
     getSessionMock.mockResolvedValue(null);
 

@@ -54,6 +54,44 @@ describe("/api/projects", () => {
     });
   });
 
+  it("returns 400 when POST receives invalid JSON", async () => {
+    getSessionMock.mockResolvedValue({
+      userId: 7,
+    });
+
+    userFirstMock.mockResolvedValue({
+      id: 7,
+      name: "Diego",
+      email: "diego@ejemplo.com",
+    });
+
+    const request = new Request(
+      "http://localhost/api/projects",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: "{invalid-json",
+      },
+    );
+
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      message: "Solicitud no válida.",
+    });
+
+    expect(userFirstMock).toHaveBeenCalledWith({
+      id: 7,
+    });
+
+    expect(projectCreateMock).not.toHaveBeenCalled();
+  });
+
   it("returns 401 when GET is requested without a session", async () => {
     getSessionMock.mockResolvedValue(null);
 

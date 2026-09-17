@@ -49,7 +49,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+
+  if (!body || typeof body !== "object") {
+    return Response.json(
+      {
+        message: "Solicitud no válida.",
+      },
+      {
+        status: 400,
+      },
+    );
+  }
 
   const taskInput = validateTaskInput({
     title: body.title,

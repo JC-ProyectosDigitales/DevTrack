@@ -4,7 +4,18 @@ import { createSession } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+
+  if (!body || typeof body !== "object") {
+    return Response.json(
+      {
+        message: "Solicitud no válida.",
+      },
+      {
+        status: 400,
+      },
+    );
+  }
 
   const email =
     typeof body.email === "string"

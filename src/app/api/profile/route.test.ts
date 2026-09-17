@@ -61,6 +61,36 @@ describe("PATCH /api/profile", () => {
     });
   });
 
+  it("returns 400 when the request body contains invalid JSON", async () => {
+    getSessionMock.mockResolvedValue({
+      userId: 7,
+    });
+
+    const request = new Request(
+      "http://localhost/api/profile",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: "{invalid-json",
+      },
+    );
+
+    const response = await PATCH(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      message: "Solicitud no válida.",
+    });
+
+    expect(userFirstMock).not.toHaveBeenCalled();
+    expect(userWhereMock).not.toHaveBeenCalled();
+    expect(userUpdateMock).not.toHaveBeenCalled();
+  });
+
   it("returns 401 when there is no session", async () => {
     getSessionMock.mockResolvedValue(null);
 

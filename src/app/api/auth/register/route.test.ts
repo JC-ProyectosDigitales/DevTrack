@@ -42,6 +42,32 @@ describe("POST /api/auth/register", () => {
     vi.clearAllMocks();
   });
 
+  it("returns 400 when the request body contains invalid JSON", async () => {
+    const request = new Request(
+      "http://localhost/api/auth/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: "{invalid-json",
+      },
+    );
+
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      message: "Solicitud no válida.",
+    });
+
+    expect(userFirstMock).not.toHaveBeenCalled();
+    expect(hashMock).not.toHaveBeenCalled();
+    expect(userCreateMock).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when required fields are missing", async () => {
     const request = new Request(
       "http://localhost/api/auth/register",
